@@ -1,0 +1,37 @@
+# Secrets and credentials
+.env
+*.pfx
+*.pem
+*.key
+credentials/
+secrets/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Build artifacts
+bin/
+target/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Librarian-specific
+**/runtime/logs/*
+!runtime/logs/.gitkeep
+**/runtime/captures/*
+!runtime/captures/.gitkeep
