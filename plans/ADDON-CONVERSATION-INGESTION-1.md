@@ -7,9 +7,46 @@
 
 ## Objective
 
-Build the first SDK reference add-on: a conversation ingestion tool that imports Claude and ChatGPT export data into a governed, searchable, provenance-tracked format.
+Build the first provenance-heavy SDK provider: a conversation ingestion tool that imports Claude and ChatGPT export data into a governed, searchable, provenance-tracked local knowledge store.
 
-This add-on exercises every SDK boundary and serves as the reference implementation for future add-on development.
+This provider serves dual purposes:
+1. **SDK validation** — exercises artifact ownership, provenance chains, entity extraction, and derived artifact tracking
+2. **Personal knowledge portability** — demonstrates that user data can be owned locally and shared with AI providers through controlled context packages rather than bulk exports
+
+## Strategic Context
+
+Without a local knowledge layer, switching AI providers requires either:
+- Surrendering complete conversation history to the new provider ("import all my data")
+- Starting from zero context
+
+With this provider, the model becomes:
+
+```
+Claude/ChatGPT Export
+        ↓
+Local governed knowledge store (user-owned)
+        ↓
+Context package (selective projection, not bulk export)
+        ↓
+Any AI provider (temporary processor, not owner)
+```
+
+The provider separates **knowledge ownership** (local store, user-controlled)
+from **reasoning capability** (AI provider, interchangeable).
+
+Information layers:
+
+| Layer | Content | Sharing Model |
+|-------|---------|---------------|
+| Identity/Profile | Preferences, working style, stable facts | Controlled projection |
+| Project Knowledge | Decisions, architecture, requirements | Per-task permission |
+| Historical Context | Conversations, experiments, drafts | Local only — not shared |
+| Raw Source | Original exports, attachments | Local only — not shared |
+
+When switching providers, the system generates a context artifact containing
+only what the new provider needs — not the entire history.
+
+Same governance pattern: Entity → Decision → Permission → Capability → Context
 
 ## Architecture
 
