@@ -11,6 +11,7 @@ pub fn all_migrations() -> Vec<Migration> {
         migration_001_initial_governance(),
         migration_002_entity_registry(),
         migration_003_decision_records(),
+        migration_004_permissions(),
     ]
 }
 
@@ -170,6 +171,42 @@ pub fn migration_003_decision_records() -> Migration {
     }
 }
 
+/// Migration 004: Permissions.
+///
+/// Creates the permissions table for entity → capability access mapping.
+/// Every permission references a recorded decision — permissions do not
+/// create authority, they reference it.
+pub fn migration_004_permissions() -> Migration {
+    Migration {
+        id: 4,
+        description: "Create permissions table (entity → capability access mapping)",
+        up_sql: indoc::indoc! {"
+            CREATE TABLE IF NOT EXISTS permissions (
+                permission_id TEXT PRIMARY KEY,
+                entity_id TEXT NOT NULL REFERENCES entities(entity_id),
+                capability_id TEXT NOT NULL,
+                decision_id TEXT NOT NULL REFERENCES decisions(decision_id),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK (status IN ('active', 'suspended', 'revoked')),
+                scope TEXT DEFAULT '*',
+                granted_at TEXT NOT NULL,
+                expires_at TEXT,
+                schema_version TEXT NOT NULL DEFAULT '1.0.0'
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_permissions_entity ON permissions(entity_id);
+            CREATE INDEX IF NOT EXISTS idx_permissions_capability ON permissions(capability_id);
+            CREATE INDEX IF NOT EXISTS idx_permissions_decision ON permissions(decision_id);
+        "},
+        down_sql: Some(indoc::indoc! {"
+            DROP INDEX IF EXISTS idx_permissions_decision;
+            DROP INDEX IF EXISTS idx_permissions_capability;
+            DROP INDEX IF EXISTS idx_permissions_entity;
+            DROP TABLE IF EXISTS permissions;
+        "}),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -244,5 +281,32 @@ mod tests {
         let m = migration_003_decision_records();
         assert!(m.up_sql.contains("entity_id"));
         assert!(m.up_sql.contains("target_entity_id"));
+    }
+
+    #[test]
+    fn test_migration_004_has_description() {
+        let m = migration_004_permissions();
+        assert!(!m.description.is_empty());
+        assert_eq!(m.id, 4);
+    }
+
+    #[test]
+    fn test_migration_004_has_permission_statuses() {
+        let m = migration_004_permissions();
+        assert!(m.up_sql.contains("'active'"));
+        assert!(m.up_sql.contains("'suspended'"));
+        assert!(m.up_sql.contains("'revoked'"));
+    }
+
+    #[test]
+    fn test_migration_004_has_decision_reference() {
+        let m = migration_004_permissions();
+        assert!(m.up_sql.contains("decision_id"));
+    }
+
+    #[test]
+    fn test_migration_004_has_scope() {
+        let m = migration_004_permissions();
+        assert!(m.up_sql.contains("scope"));
     }
 }

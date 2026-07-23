@@ -22,6 +22,7 @@ pub mod custody;
 pub mod decisions;
 pub mod entity;
 pub mod evidence;
+pub mod permissions;
 pub mod receipts;
 pub mod equivalence;
 pub mod migrations;
