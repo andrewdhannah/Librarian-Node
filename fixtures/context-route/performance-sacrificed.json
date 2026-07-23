@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-ps-001",
+  "contract_version": "0.1",
+  "workload_type": "sprint_closeout",
+  "selected_context_route": "canonical_evidence_read",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "verified_current",
+  "provenance_state": "verified",
+  "governance_outcome": "safe",
+  "estimated_latency_ms": 525.0,
+  "performance_sacrificed_for_evidence": true,
+  "reason_selected": "Sprint closeout requires fresh git/test evidence. RAM cache was faster (298ms) but cannot guarantee freshness for closeout evidence requirements.",
+  "alternatives_rejected": [
+    {
+      "route": "ram_cache",
+      "reason": "RAM cache (298ms) is faster but may contain stale git/test state for closeout"
+    },
+    {
+      "route": "ssd_cache",
+      "reason": "SSD cache has even lower freshness guarantees than RAM cache"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": true,
+    "requires_current_test_state": true,
+    "requires_canonical_source": true,
+    "allows_stale_context": false
+  },
+  "receipt_summary": {
+    "label": "Canonical evidence selected; performance sacrificed for evidence quality",
+    "detail": "Slower canonical evidence read selected over faster RAM cache to ensure sprint closeout evidence integrity.",
+    "risk": "low"
+  }
+}

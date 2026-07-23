@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Interface sketch for receipt consumption of context decision metadata. This is a design artifact, not production code.",
+  "sprint_id": "MAC/WIN-ROUTER-CONTEXT-RUNTIME-DESIGN-1",
+  "status": "advisory — design only",
+  "interfaces": {
+    "receipt_with_context_decision": {
+      "description": "Receipt structure including context decision metadata",
+      "fields": {
+        "status": {
+          "type": "string",
+          "description": "Receipt status (existing field)"
+        },
+        "profile": {
+          "type": "string",
+          "description": "Selected model profile (existing field)"
+        },
+        "authority": {
+          "type": "string",
+          "description": "Authority level (existing field)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Receipt timestamp (existing field)"
+        },
+        "context_decision": {
+          "type": "object",
+          "description": "Context decision advisory metadata (NEW — advisory only)",
+          "fields": {
+            "advisory": {
+              "type": "boolean",
+              "description": "Always true — this is advisory metadata only"
+            },
+            "selected_context_route": {
+              "type": "string",
+              "description": "Recommended context route from decision layer"
+            },
+            "estimated_latency_ms": {
+              "type": "number",
+              "description": "Estimated latency from measured costs"
+            },
+            "governance_outcome": {
+              "type": "string",
+              "description": "Governance evaluation result"
+            },
+            "workload_type": {
+              "type": "string",
+              "description": "Workload type that was evaluated"
+            },
+            "measured_costs_version": {
+              "type": "string",
+              "description": "Version of measured costs used"
+            },
+            "decision_id": {
+              "type": "string",
+              "description": "Unique identifier for the decision"
+            },
+            "receipt_summary": {
+              "type": "object",
+              "description": "Human-readable summary for audit",
+              "fields": {
+                "label": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                },
+                "risk": {
+                  "type": "string",
+                  "enum": ["low", "medium", "high"]
+                }
+              }
+            }
+          }
+        }
+      },
+      "example": {
+        "status": "ok",
+        "profile": "phi-4",
+        "authority": "advisory_only",
+        "timestamp": "2026-06-28T12:00:00.000000+00:00",
+        "context_decision": {
+          "advisory": true,
+          "selected_context_route": "canonical_evidence_read",
+          "estimated_latency_ms": 70.9,
+          "governance_outcome": "safe",
+          "workload_type": "sprint_closeout",
+          "measured_costs_version": "1.0.0",
+          "decision_id": "ctx-decision-abc12345",
+          "receipt_summary": {
+            "label": "canonical_evidence_read selected for Sprint Closeout",
+            "detail": "Performance was sacrificed to satisfy live_git_test_state evidence requirements.",
+            "risk": "high"
+          }
+        }
+      }
+    }
+  }
+}

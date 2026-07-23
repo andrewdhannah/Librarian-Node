@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-bl-001",
+  "contract_version": "0.1",
+  "workload_type": "receipt_generation",
+  "selected_context_route": "ram_cache",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "provenance_weak",
+  "provenance_state": "blocked",
+  "governance_outcome": "blocked",
+  "estimated_latency_ms": 999999,
+  "performance_sacrificed_for_evidence": false,
+  "reason_selected": "RAM cache with weak provenance is blocked for receipt generation. Canonical evidence with verified provenance is required.",
+  "alternatives_rejected": [
+    {
+      "route": "canonical_evidence_read",
+      "reason": "Should be selected instead of blocked ram_cache for receipt generation"
+    },
+    {
+      "route": "compressed_recall_packet",
+      "reason": "Insufficient provenance for receipt generation"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": true,
+    "requires_current_test_state": true,
+    "requires_canonical_source": true,
+    "allows_stale_context": false
+  },
+  "receipt_summary": {
+    "label": "Route blocked: weak provenance for receipt generation",
+    "detail": "RAM cache with weak provenance cannot serve receipt generation. Canonical evidence required.",
+    "risk": "high"
+  }
+}

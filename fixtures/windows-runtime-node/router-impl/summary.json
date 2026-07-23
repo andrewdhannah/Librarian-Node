@@ -1,0 +1,53 @@
+﻿{
+  "sprint": "WIN-ROUTER-IMPL-1",
+  "title": "Router Implementation on Windows Runtime Node",
+  "completed": "2026-06-19 04:13:19",
+  "classification": "COMPLETE / ROUTING READY",
+  "verification": {
+    "endpoints": {
+      "GET /backend/status": "PASS",
+      "GET /backend/profiles": "PASS",
+      "GET /backend/health": "PASS",
+      "POST /backend/select (valid)": "PASS",
+      "POST /backend/select (invalid)": "PASS",
+      "POST /backend/chat (valid)": "PASS",
+      "POST /backend/chat (authority refusal)": "PASS",
+      "POST /backend/restart": "PASS"
+    },
+    "refusal_conditions": {
+      "unknown_profile": "PASS",
+      "authority_required": "PASS"
+    },
+    "backend_lifecycle": {
+      "start_healthy": "PASS",
+      "identity_verification": "PASS",
+      "restart_new_pid": "PASS",
+      "process_cleanup": "PASS"
+    }
+  },
+  "profiles_registered": 5,
+  "active_profile": "qwen-coder",
+  "evidence_files": [
+    "router-status.json",
+    "router-profiles.json",
+    "router-health.json",
+    "select-valid.json",
+    "select-invalid.json",
+    "chat-valid.json",
+    "chat-refused.json",
+    "restart.json"
+  ],
+  "deployment": {
+    "router_path": "G:\\openwork\\librarian-runtime-node\\router\\router.py",
+    "config_path": "G:\\openwork\\librarian-runtime-node\\config\\model-profiles.json",
+    "test_port": 9130,
+    "profile_ports": "9120-9124",
+    "authority_mode": "advisory_only",
+    "python_version": "3.14.3"
+  },
+  "issues_encountered": {
+    "deadlock_in_check_health": "Fixed: removed self._lock from _check_health() which deadlocked when called from start()",
+    "single_threaded_httpserver": "Fixed: switched from HTTPServer to ThreadingHTTPServer for concurrent requests"
+  },
+  "next_recommended_sprint": "WIN-SERVICE-LIFECYCLE-1"
+}

@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-sc-001",
+  "contract_version": "0.1",
+  "workload_type": "sprint_closeout",
+  "selected_context_route": "canonical_evidence_read",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "verified_current",
+  "provenance_state": "verified",
+  "governance_outcome": "safe",
+  "estimated_latency_ms": 525.0,
+  "performance_sacrificed_for_evidence": true,
+  "reason_selected": "Sprint closeout requires current git state and test results. Canonical evidence read provides verified fresh artifacts.",
+  "alternatives_rejected": [
+    {
+      "route": "ram_cache",
+      "reason": "RAM cache may contain stale state; closeout requires verified fresh evidence"
+    },
+    {
+      "route": "compressed_recall_packet",
+      "reason": "Recall packet insufficient for live git/test evidence verification"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": true,
+    "requires_current_test_state": true,
+    "requires_canonical_source": true,
+    "allows_stale_context": false
+  },
+  "receipt_summary": {
+    "label": "Canonical evidence selected for sprint closeout",
+    "detail": "Fresh git and test state read. Performance sacrificed to ensure evidence quality.",
+    "risk": "low"
+  }
+}

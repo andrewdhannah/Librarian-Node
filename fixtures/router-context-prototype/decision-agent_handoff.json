@@ -1,0 +1,103 @@
+{
+  "decision_id": "decision-ba5e1d7c",
+  "timestamp": "2026-06-28T04:55:16.342198+00:00",
+  "sprint_id": "MAC/WIN-ROUTER-CONTEXT-PROTOTYPE-1",
+  "prototype_status": "non-production \u2014 mock decision only",
+  "hardware_profile": "windows_runtime_node",
+  "node_health": "stopped",
+  "model_route": {
+    "selected_runtime_profile": "windows_runtime_node",
+    "selected_model_profile": "phi-4",
+    "backend_state": "unavailable",
+    "fit": "suitable",
+    "estimated_runtime_cost_ms": 0,
+    "reason_selected": "Selected phi-4 (2.32 GB Q4_K_M. General advisory. Clean output.) for Agent Handoff workload. Task class: general_advisory. Backend state: unavailable (LibrarianRunTimeNode is stopped).",
+    "alternatives_rejected": [
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "qwen-coder",
+        "reason": "qwen-coder does not match preferred task class general_advisory."
+      },
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "llama-3.2",
+        "reason": "Alternative llama-3.2 supports general_advisory but phi-4 is preferred for this workload."
+      },
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "qwen3",
+        "reason": "Alternative qwen3 supports general_advisory but phi-4 is preferred for this workload."
+      },
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "gemma-3",
+        "reason": "Alternative gemma-3 supports general_advisory but phi-4 is preferred for this workload."
+      },
+      {
+        "runtime_profile": "mac_coordinator",
+        "reason": "Coordinator should not perform this runtime task. Mac profile not measured in measurement sprint."
+      }
+    ],
+    "limitations": "2.32 GB Q4_K_M. General advisory. Clean output."
+  },
+  "context_route": {
+    "route_id": "ctx-route-age-27f4a95c",
+    "contract_version": "0.1",
+    "workload_type": "agent_handoff",
+    "selected_context_route": "compressed_recall_packet",
+    "selected_runtime_profile": "windows_runtime_node",
+    "freshness_state": "verified_current",
+    "provenance_state": "verified",
+    "governance_outcome": "safe",
+    "estimated_latency_ms": 4.17,
+    "performance_sacrificed_for_evidence": false,
+    "reason_selected": "Selected compressed_recall_packet for Agent Handoff workload. Measured latency: ~4.17ms. Freshness: verified_current. Provenance: verified. Governance: safe.",
+    "alternatives_rejected": [
+      {
+        "route": "ram_cache",
+        "reason": "Local ram_cache costs ~4.17ms (measured warm read). Governance/evidence requirements favor compressed_recall_packet for agent_handoff."
+      },
+      {
+        "route": "ssd_cache",
+        "reason": "Local ssd_cache costs ~16.85ms (measured warm read). Governance/evidence requirements favor compressed_recall_packet for agent_handoff."
+      },
+      {
+        "route": "recent_turn_window",
+        "reason": "Local recent_turn_window costs ~0.30ms (measured warm read). Governance/evidence requirements favor compressed_recall_packet for agent_handoff."
+      },
+      {
+        "route": "recomputation_from_source",
+        "reason": "Route recomputation_from_source costs ~500.0ms. Selected compressed_recall_packet (4.2ms) as better fit."
+      }
+    ],
+    "evidence_requirements": {
+      "requires_current_git_state": false,
+      "requires_current_test_state": false,
+      "requires_canonical_source": false,
+      "allows_stale_context": true
+    },
+    "receipt_summary": {
+      "label": "compressed_recall_packet selected for Agent Handoff",
+      "detail": "Compressed recall packet provides complete state for agent_handoff. Measured local processing cost: ~0.50ms for 32K tokens. Serialize+compress+decompress pipeline is negligible.",
+      "risk": "low"
+    },
+    "_measured_costs_used": {
+      "route": "compressed_recall_packet",
+      "estimated_latency_ms": 4.17,
+      "all_route_latencies": {
+        "compressed_recall_packet": 4.17,
+        "ram_cache": 4.17,
+        "ssd_cache": 16.85,
+        "recent_turn_window": 0.3,
+        "recomputation_from_source": 500.0
+      }
+    }
+  },
+  "decision_summary": {
+    "workload_type": "agent_handoff",
+    "selected_model": "phi-4",
+    "selected_context_route": "compressed_recall_packet",
+    "estimated_total_latency_ms": 4.17,
+    "governance_outcome": "safe"
+  }
+}

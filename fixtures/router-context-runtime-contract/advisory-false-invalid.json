@@ -1,0 +1,36 @@
+{
+  "runtime_context_decision_contract_version": "0.1",
+  "request_id": "ctx-advisory-false-001",
+  "workload_type": "sprint_closeout",
+  "task_risk_level": "high",
+  "requested_operation": "This is an INVALID fixture — testing advisory=false rejection.",
+  "available_runtime_profiles": [
+    "windows_runtime_node"
+  ],
+  "measured_hardware_profile_refs": [
+    "windows_runtime_node"
+  ],
+  "context_candidates": [
+    {
+      "route": "canonical_evidence_read",
+      "estimated_latency_ms": 70.9,
+      "provenance": "verified"
+    }
+  ],
+  "freshness_requirements": {
+    "requires_current_git_state": true,
+    "requires_current_test_state": true,
+    "allows_stale_context": false
+  },
+  "provenance_requirements": {
+    "requires_canonical_source": true,
+    "requires_verified_provenance": true
+  },
+  "evidence_requirements": {
+    "requires_canonical_evidence": true,
+    "acceptable_evidence_types": ["git_status"]
+  },
+  "advisory": false,
+  "production_effects_allowed": false,
+  "_invalid_reason": "advisory is false — contract requires advisory=true for all valid objects"
+}

@@ -1,0 +1,81 @@
+/* ═══════════════════════════════════════════
+   Librarian Design Tokens
+   Apple-adjacent professional UI
+   Calm information density
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* ── Color Palette ── */
+  --lr-bg-base: #0d0d14;
+  --lr-bg-surface: #16161f;
+  --lr-bg-card: #1c1c28;
+  --lr-bg-hover: #24243a;
+  --lr-bg-active: #2a2a45;
+
+  --lr-border-default: #2a2a3e;
+  --lr-border-subtle: #1e1e30;
+  --lr-border-focus: #00d4aa;
+
+  --lr-text-primary: #e8e8f0;
+  --lr-text-secondary: #9090a8;
+  --lr-text-tertiary: #60607a;
+  --lr-text-placeholder: #3a3a52;
+
+  --lr-accent: #00d4aa;
+  --lr-accent-soft: #00d4aa18;
+  --lr-accent-hover: #00e6b3;
+
+  --lr-green: #34d399;
+  --lr-green-soft: #34d39918;
+  --lr-yellow: #f59e0b;
+  --lr-yellow-soft: #f59e0b18;
+  --lr-red: #ef4444;
+  --lr-red-soft: #ef444418;
+  --lr-gray: #6b7280;
+  --lr-gray-soft: #6b728018;
+  --lr-blue: #3b82f6;
+  --lr-blue-soft: #3b82f618;
+
+  /* ── Typography ── */
+  --lr-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --lr-font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  --lr-text-xs: 11px;
+  --lr-text-sm: 13px;
+  --lr-text-base: 15px;
+  --lr-text-lg: 17px;
+  --lr-text-xl: 20px;
+  --lr-text-2xl: 24px;
+
+  --lr-weight-regular: 400;
+  --lr-weight-medium: 500;
+  --lr-weight-semibold: 600;
+
+  --lr-leading-tight: 1.2;
+  --lr-leading-normal: 1.5;
+
+  /* ── Spacing ── */
+  --lr-space-1: 4px;
+  --lr-space-2: 8px;
+  --lr-space-3: 12px;
+  --lr-space-4: 16px;
+  --lr-space-5: 20px;
+  --lr-space-6: 24px;
+  --lr-space-8: 32px;
+  --lr-space-10: 40px;
+
+  /* ── Radii ── */
+  --lr-radius-sm: 6px;
+  --lr-radius-md: 10px;
+  --lr-radius-lg: 14px;
+  --lr-radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --lr-shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --lr-shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --lr-shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+
+  /* ── Transitions ── */
+  --lr-transition-fast: 120ms ease;
+  --lr-transition-normal: 200ms ease;
+}

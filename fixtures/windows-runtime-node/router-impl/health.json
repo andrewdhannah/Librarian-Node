@@ -1,0 +1,37 @@
+{
+  "status": "degraded",
+  "active_profile": "qwen-coder",
+  "profiles": {
+    "phi-4": {
+      "status": "degraded",
+      "state": "stopped",
+      "identity_verified": false,
+      "port": 9120
+    },
+    "qwen-coder": {
+      "status": "ok",
+      "state": "healthy",
+      "identity_verified": true,
+      "port": 9121
+    },
+    "llama-3.2": {
+      "status": "degraded",
+      "state": "stopped",
+      "identity_verified": false,
+      "port": 9122
+    },
+    "qwen3": {
+      "status": "degraded",
+      "state": "stopped",
+      "identity_verified": false,
+      "port": 9123
+    },
+    "gemma-3": {
+      "status": "degraded",
+      "state": "stopped",
+      "identity_verified": false,
+      "port": 9124
+    }
+  },
+  "authority": "advisory_only"
+}

@@ -1,0 +1,23 @@
+{
+  "_comment": "Calibrated profiles from MAC/WIN-ROUTER-CONTEXT-MEASURE-1 measurements",
+  "windows_runtime_node": {
+    "status": "measured",
+    "file_read_warm_ms": {
+      "429tok": 0.2489,
+      "8ktok": 0.2559,
+      "32ktok": 0.2781
+    },
+    "json_parse_warm_ms": 0.0502,
+    "json_serialize_ms": 0.1073,
+    "git_status_ms": 70.9034,
+    "git_revparse_ms": 55.4684
+  },
+  "mac_coordinator": {
+    "status": "not_measured_in_this_sprint"
+  },
+  "weak_lan_runtime_node": {
+    "status": "derived_from_measurements",
+    "unreachable_timeout_ms": 4015.9293,
+    "connection_refused_ms": 4017.1709
+  }
+}

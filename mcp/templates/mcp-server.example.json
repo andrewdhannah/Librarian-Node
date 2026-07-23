@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "description": "EXAMPLE MCP server configuration templates for The Librarian",
+    "sprint": "WIN-MCP-TEMPLATE-RECONCILE-1",
+    "contract": "EXAMPLE ONLY — copy values into your OpenWork MCP extension settings or local OpenWork config. Do not commit machine-local values.",
+    "authority": "advisory_only",
+    "updated": "2026-06-28",
+    "platform_separation_note": "macOS and Windows examples are kept separate. No single command works on both platforms. Pick your platform's example."
+  },
+  "examples": [
+    {
+      "platform": "macOS",
+      "label": "macOS — Swift-run Librarian Server (stdio bridge)",
+      "note": "Requires Swift toolchain. Uses the mcp-bridge.sh stdio wrapper.",
+      "type": "local",
+      "command": "/bin/bash",
+      "args": [
+        "-c",
+        "cd /path/to/TheLibrarian && swift run LibrarianServer"
+      ],
+      "env": {
+        "LIBRARIAN_MCP_URL": "http://127.0.0.1:3456/mcp"
+      },
+      "macOS_only": true,
+      "windows_native_command": null
+    },
+    {
+      "platform": "macOS",
+      "label": "macOS — stdio bridge script (reuse mcp-bridge.sh)",
+      "note": "Alternative: run the shell bridge directly. Reads JSON-RPC from stdin and proxies to the remote Librarian MCP endpoint.",
+      "type": "local",
+      "command": "/bin/bash",
+      "args": [
+        "/path/to/TheLibrarian/scripts/mcp-bridge.sh"
+      ],
+      "env": {
+        "LIBRARIAN_MCP_URL": "http://127.0.0.1:3456/mcp"
+      },
+      "macOS_only": true,
+      "windows_native_command": null
+    },
+    {
+      "platform": "windows",
+      "label": "Windows — compiled LibrarianServer.exe (stdio bridge)",
+      "note": "The Librarian Swift server compiled for Windows as LibrarianServer.exe. Replace <repo-root> with your actual repository path. Do not commit machine-local values.",
+      "type": "local",
+      "command": "<repo-root>\\LibrarianServer.exe",
+      "args": [],
+      "env": {
+        "LIBRARIAN_MCP_URL": "http://127.0.0.1:3456/mcp"
+      },
+      "macOS_only": false,
+      "windows_native_command": true
+    },
+    {
+      "platform": "windows",
+      "label": "Windows — PowerShell stdio bridge (reuse mcp-bridge.ps1)",
+      "note": "PowerShell equivalent of the macOS mcp-bridge.sh. Reads JSON-RPC from stdin and proxies to the Librarian MCP endpoint. Replace <repo-root> with your actual repository path.",
+      "type": "local",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "<repo-root>\\scripts\\mcp-bridge.ps1"
+      ],
+      "env": {
+        "LIBRARIAN_MCP_URL": "http://127.0.0.1:3456/mcp"
+      },
+      "macOS_only": false,
+      "windows_native_command": true
+    },
+    {
+      "platform": "windows",
+      "label": "Windows — PowerShell stdio bridge (repo-relative, from librarian-runtime-node)",
+      "note": "Same as above, but referencing mcp-bridge.ps1 relative to librarian-runtime-node. Replace <runtime-node-root> with your local clone path.",
+      "type": "local",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "<runtime-node-root>\\scripts\\mcp-bridge.ps1"
+      ],
+      "env": {
+        "LIBRARIAN_MCP_URL": "http://127.0.0.1:3456/mcp"
+      },
+      "macOS_only": false,
+      "windows_native_command": true
+    }
+  ],
+  "platform_key": {
+    "macOS_only": "This example will NOT work on Windows. Requires macOS + Swift toolchain.",
+    "windows_native_command": "This example is Windows-native and will NOT work on macOS without WSL or equivalent.",
+    "placeholders": {
+      "<repo-root>": "Replace with the full path to your cloned TheLibrarian repository, e.g., C:\\Users\\<user>\\Projects\\TheLibrarian",
+      "<runtime-node-root>": "Replace with the full path to your cloned librarian-runtime-node repository, e.g., C:\\Users\\<user>\\Projects\\librarian-runtime-node"
+    }
+  }
+}

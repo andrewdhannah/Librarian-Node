@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-ah-001",
+  "contract_version": "0.1",
+  "workload_type": "agent_handoff",
+  "selected_context_route": "compressed_recall_packet",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "verified_current",
+  "provenance_state": "verified",
+  "governance_outcome": "safe",
+  "estimated_latency_ms": 69.42,
+  "performance_sacrificed_for_evidence": false,
+  "reason_selected": "Agent handoff requires a complete state snapshot. Recall packets preserve decisions, evidence, current state, and next action.",
+  "alternatives_rejected": [
+    {
+      "route": "ram_cache",
+      "reason": "RAM cache is faster but does not capture the full handoff state needed for agent continuity"
+    },
+    {
+      "route": "recomputation_from_source",
+      "reason": "Recomputation is unnecessary; recall packet provides sufficient continuity"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": false,
+    "requires_current_test_state": false,
+    "requires_canonical_source": false,
+    "allows_stale_context": true
+  },
+  "receipt_summary": {
+    "label": "Recall packet selected for agent handoff",
+    "detail": "Compressed recall packet preserves complete state for agent continuity across handoff.",
+    "risk": "low"
+  }
+}

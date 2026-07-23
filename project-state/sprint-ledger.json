@@ -1,0 +1,519 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-07-01T12:00:00Z",
+  "generated_by": "WIN-MULTIPLATFORM-LIBRARIAN-PLANNING-1",
+  "current_head": {
+    "full": "05aabeebf3fcce6038a233ef1853bff62bb51a75",
+    "short": "05aabee",
+    "branch": "main"
+  },
+  "origin_sync_state": "in_sync",
+  "active_sprint": null,
+  "next_authorized_sprint": "WIN-HARNESS-CUSTODY-LEDGER-1",
+  "sprints": [
+    {
+      "sprint_id": "RUNTIME-REPO-INIT-1",
+      "status": "sealed",
+      "commit": "6e2ab34",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/RUNTIME-REPO-INIT-1.md",
+      "primary_files": [
+        ".gitignore",
+        "README.md",
+        "config/model-profiles.json",
+        "config/runtime-node.example.json"
+      ],
+      "category": "init",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-SERVICE-LIFECYCLE-1",
+      "notes": "Repository initialization and baseline config"
+    },
+    {
+      "sprint_id": "WIN-SERVICE-LIFECYCLE-1",
+      "status": "sealed",
+      "commit": "7bfb880",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-SERVICE-LIFECYCLE-1.md",
+      "primary_files": [
+        "scripts/start-librarian-runtime-node.ps1",
+        "runtime/bin/nssm.exe"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-BACKEND-SERVICE-PROOF-1",
+      "notes": "Windows service lifecycle wrapper and NSSM service setup"
+    },
+    {
+      "sprint_id": "WIN-BACKEND-SERVICE-PROOF-1",
+      "status": "sealed",
+      "commit": "4a34666",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-BACKEND-SERVICE-PROOF-1.md",
+      "primary_files": [
+        "scripts/test-rust-router-endpoints.ps1"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-ROUTER-HARDEN-1",
+      "notes": "Backend lifecycle proof under Windows service"
+    },
+    {
+      "sprint_id": "WIN-ROUTER-HARDEN-1",
+      "status": "sealed",
+      "commit": "48788be",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-ROUTER-HARDEN-1.md",
+      "primary_files": [
+        "rust-router/src/",
+        "router/router.py"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-MODEL-CONTEXT-FIT-2",
+      "notes": "Router hardening and integration tests"
+    },
+    {
+      "sprint_id": "WIN-MODEL-CONTEXT-FIT-2",
+      "status": "sealed",
+      "commit": "1dc4804",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-MODEL-CONTEXT-FIT-2.md",
+      "primary_files": [
+        "scripts/test-model-fit.ps1",
+        "scripts/test-reduced-offload-fit.ps1"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "ROUTER-PORTABILITY-1",
+      "notes": "Context fit verification for RX 570 profiles"
+    },
+    {
+      "sprint_id": "ROUTER-PORTABILITY-1",
+      "status": "sealed",
+      "commit": "b92159c",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/ROUTER-PORTABILITY-1.md",
+      "primary_files": [
+        "docs/sprints/ROUTER-PORTABILITY-1.md"
+      ],
+      "category": "planning",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "REDUCED-OFFLOAD-FIT-1",
+      "notes": "Portable Router contract definition and Windows implementation map"
+    },
+    {
+      "sprint_id": "REDUCED-OFFLOAD-FIT-1",
+      "status": "sealed",
+      "commit": "c44150b",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/REDUCED-OFFLOAD-FIT-1.md",
+      "primary_files": [
+        "scripts/test-reduced-offload-fit.ps1",
+        "scripts/run-model-fit-matrix.ps1"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WINDOWS-PC-PLAN-UPDATE-1",
+      "notes": "Reduced-offload fit verification for RX 570 OOM profiles"
+    },
+    {
+      "sprint_id": "WINDOWS-PC-PLAN-UPDATE-1",
+      "status": "sealed",
+      "commit": "2818394",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WINDOWS-PC-PLAN-UPDATE-1.md",
+      "primary_files": [
+        "docs/roadmap/WINDOWS-PC-SPRINT-ROADMAP.md",
+        "docs/operations/WINDOWS-AGENT-STARTUP-SEQUENCE.md"
+      ],
+      "category": "planning",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUNTIME-INTEGRATION-1",
+      "notes": "Windows PC sprint roadmap and agent startup sequence"
+    },
+    {
+      "sprint_id": "WIN-RUNTIME-INTEGRATION-1",
+      "status": "sealed",
+      "commit": "0defb87",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": null,
+      "primary_files": [
+        "scripts/run-integration-proof-v2.ps1",
+        "scripts/verify-receipt.ps1"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUNTIME-RECEIPT-CLEANUP-1",
+      "notes": "Runtime integration proof and receipt verifier"
+    },
+    {
+      "sprint_id": "WIN-RUNTIME-RECEIPT-CLEANUP-1",
+      "status": "sealed",
+      "commit": "51c2e85",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-RUNTIME-RECEIPT-CLEANUP-1.md",
+      "primary_files": [
+        "receipts/runtime-integration/schema-v2.json"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUNTIME-RECEIPTS-2",
+      "notes": "Receipt cleanup and reconciliation"
+    },
+    {
+      "sprint_id": "WIN-RUNTIME-RECEIPTS-2",
+      "status": "sealed",
+      "commit": "f82d301",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-RUNTIME-RECEIPTS-2.md",
+      "primary_files": [
+        "receipts/runtime-integration/schema-v2.json",
+        "scripts/verify-receipt.ps1",
+        "scripts/run-integration-proof-v2.ps1"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUNTIME-QUALIFICATION-1",
+      "notes": "Version 2 receipt schema, verifier, and integration proof"
+    },
+    {
+      "sprint_id": "WIN-RUNTIME-QUALIFICATION-1",
+      "status": "sealed",
+      "commit": "e7cfe33",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": null,
+      "sprint_doc_path": "docs/sprints/WIN-RUNTIME-QUALIFICATION-1.md",
+      "primary_files": [
+        "scripts/run-runtime-qualification.ps1",
+        "scripts/verify-runtime-qualification.ps1",
+        "scripts/test-runtime-artifact-identity.ps1",
+        "scripts/test-runtime-profiles.ps1",
+        "scripts/test-runtime-cleanup.ps1"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUNTIME-CONTROLLED-ACTIVATION-1",
+      "notes": "Runtime qualification proof gate with 38/38 gates passed"
+    },
+    {
+      "sprint_id": "WIN-RUNTIME-CONTROLLED-ACTIVATION-1",
+      "status": "sealed",
+      "commit": "08a8602",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-RUNTIME-CONTROLLED-ACTIVATION-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-RUNTIME-CONTROLLED-ACTIVATION-1.md",
+      "primary_files": [
+        "docs/sprints/WIN-RUNTIME-CONTROLLED-ACTIVATION-1.md",
+        "docs/receipts/WIN-RUNTIME-CONTROLLED-ACTIVATION-1-RECEIPT.md"
+      ],
+      "category": "runtime",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-AGENT-HARNESS-ENV-BASELINE-1",
+      "notes": "Controlled first service activation of LibrarianRunTimeNode"
+    },
+    {
+      "sprint_id": "WIN-AGENT-HARNESS-ENV-BASELINE-1",
+      "status": "sealed",
+      "commit": "2895584",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-AGENT-HARNESS-ENV-BASELINE-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-AGENT-HARNESS-ENV-BASELINE-1.md",
+      "primary_files": [
+        "docs/planning/WIN-AGENT-HARNESS-ENV-BASELINE-1-BASELINE.md",
+        "docs/receipts/WIN-AGENT-HARNESS-ENV-BASELINE-1-RECEIPT.md",
+        "scripts/collect-inventory.ps1"
+      ],
+      "category": "harness",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-ORIGIN-AHEAD-RECONCILE-1",
+      "notes": "Read-only Windows agent-host environment baseline across 24 dimensions"
+    },
+    {
+      "sprint_id": "WIN-ORIGIN-AHEAD-RECONCILE-1",
+      "status": "sealed",
+      "commit": "06768f3",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-ORIGIN-AHEAD-RECONCILE-1-RECEIPT.md",
+      "sprint_doc_path": null,
+      "primary_files": [
+        "docs/receipts/WIN-ORIGIN-AHEAD-RECONCILE-1-RECEIPT.md"
+      ],
+      "category": "maintenance",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-AGENT-HARNESS-PLAN-1",
+      "notes": "Reconciled 21-commit ahead state; origin in sync, no custody breach"
+    },
+    {
+      "sprint_id": "WIN-AGENT-HARNESS-PLAN-1",
+      "status": "sealed",
+      "commit": "7cc7d10",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-AGENT-HARNESS-PLAN-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-AGENT-HARNESS-PLAN-1.md",
+      "primary_files": [
+        "docs/planning/WIN-AGENT-HARNESS-PLAN.md",
+        "docs/planning/WIN-CUSTODY-SANDBOX-MODEL.md",
+        "docs/planning/WIN-HARNESS-PARITY-ROADMAP.md",
+        "docs/planning/WIN-LIBRARIAN-HOST-OPTIONS.md",
+        "docs/planning/WIN-SPRINT-SEQUENCE.md"
+      ],
+      "category": "planning",
+      "phase": "pre-0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-PACKET-VALIDATION-HOOK-1",
+      "notes": "Five governing plan documents for Windows agent harness and Librarian host"
+    },
+    {
+      "sprint_id": "WIN-PACKET-VALIDATION-HOOK-1",
+      "status": "sealed",
+      "commit": "d3ea60c",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-PACKET-VALIDATION-HOOK-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-PACKET-VALIDATION-HOOK-1.md",
+      "primary_files": [
+        "scripts/harness/pre-mutation-check.ps1",
+        "docs/sprints/WIN-PACKET-VALIDATION-HOOK-1.md",
+        "docs/receipts/WIN-PACKET-VALIDATION-HOOK-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-PC-REMAINING-SPRINTS-PLAN-1",
+      "notes": "Pre-mutation custody gate with 11 checks, exit 0/1"
+    },
+    {
+      "sprint_id": "WIN-PC-REMAINING-SPRINTS-PLAN-1",
+      "status": "sealed",
+      "commit": "6b1abf2",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-PC-REMAINING-SPRINTS-PLAN-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-PC-REMAINING-SPRINTS-PLAN-1.md",
+      "primary_files": [
+        "docs/planning/WIN-PC-REMAINING-SPRINTS-PLAN.md",
+        "docs/planning/WIN-PC-SPRINT-GUARDRAIL-NEEDS.md",
+        "docs/sprints/WIN-PC-REMAINING-SPRINTS-PLAN-1.md",
+        "docs/receipts/WIN-PC-REMAINING-SPRINTS-PLAN-1-RECEIPT.md"
+      ],
+      "category": "planning",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-POSTFLIGHT-1",
+      "notes": "Remaining sprint map: 20 sprints, 5 phases, 13 guardrail categories"
+    },
+    {
+      "sprint_id": "WIN-HARNESS-POSTFLIGHT-1",
+      "status": "sealed",
+      "commit": "4f84852",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-HARNESS-POSTFLIGHT-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-HARNESS-POSTFLIGHT-1.md",
+      "primary_files": [
+        "scripts/harness/postflight-check.ps1",
+        "docs/sprints/WIN-HARNESS-POSTFLIGHT-1.md",
+        "docs/receipts/WIN-HARNESS-POSTFLIGHT-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-RECEIPT-TEMPLATE-1",
+      "notes": "Post-flight state verification with deterministic receipt output"
+    },
+    {
+      "sprint_id": "WIN-HARNESS-RECEIPT-TEMPLATE-1",
+      "status": "sealed",
+      "commit": "85060f8",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-HARNESS-RECEIPT-TEMPLATE-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-HARNESS-RECEIPT-TEMPLATE-1.md",
+      "primary_files": [
+        "scripts/harness/new-sprint-receipt.ps1",
+        "docs/sprints/WIN-HARNESS-RECEIPT-TEMPLATE-1.md",
+        "docs/receipts/WIN-HARNESS-RECEIPT-TEMPLATE-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-CONTRACT-RUNNER-1",
+      "notes": "Standardized sprint receipt generator (Markdown, deterministic)"
+    },
+    {
+      "sprint_id": "WIN-HARNESS-CONTRACT-RUNNER-1",
+      "status": "sealed",
+      "commit": "df55713",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-HARNESS-CONTRACT-RUNNER-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-HARNESS-CONTRACT-RUNNER-1.md",
+      "primary_files": [
+        "scripts/harness/run-contract-checks.ps1",
+        "docs/sprints/WIN-HARNESS-CONTRACT-RUNNER-1.md",
+        "docs/receipts/WIN-HARNESS-CONTRACT-RUNNER-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-BASELINE-DIFF-1",
+      "notes": "Unified contract test runner: 44 checks, 7 categories"
+    },
+    {
+      "sprint_id": "WIN-HARNESS-BASELINE-DIFF-1",
+      "status": "sealed",
+      "commit": "a8fd165",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-HARNESS-BASELINE-DIFF-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-HARNESS-BASELINE-DIFF-1.md",
+      "primary_files": [
+        "scripts/harness/baseline-diff.ps1",
+        "docs/sprints/WIN-HARNESS-BASELINE-DIFF-1.md",
+        "docs/receipts/WIN-HARNESS-BASELINE-DIFF-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUST-TOOLCHAIN-DRIFT-TRIAGE-1",
+      "notes": "Baseline drift detection across 11 comparison sections"
+    },
+    {
+      "sprint_id": "WIN-RUST-TOOLCHAIN-DRIFT-TRIAGE-1",
+      "status": "sealed",
+      "commit": "59f4cba",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-RUST-TOOLCHAIN-DRIFT-TRIAGE-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-RUST-TOOLCHAIN-DRIFT-TRIAGE-1.md",
+      "primary_files": [
+        "docs/sprints/WIN-RUST-TOOLCHAIN-DRIFT-TRIAGE-1.md",
+        "docs/receipts/WIN-RUST-TOOLCHAIN-DRIFT-TRIAGE-1-RECEIPT.md"
+      ],
+      "category": "maintenance",
+      "phase": "0a",
+      "owner_review_required": true,
+      "next_sprint": "WIN-SPRINT-LEDGER-1",
+      "notes": "Read-only rustc NOT_FOUND investigation; toolchain intact but shim layer missing"
+    },
+    {
+      "sprint_id": "WIN-SPRINT-LEDGER-1",
+      "status": "sealed",
+      "commit": "0942096",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-SPRINT-LEDGER-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-SPRINT-LEDGER-1.md",
+      "primary_files": [
+        "project-state/sprint-ledger.json",
+        "scripts/harness/validate-sprint-ledger.ps1",
+        "docs/sprints/WIN-SPRINT-LEDGER-1.md",
+        "docs/receipts/WIN-SPRINT-LEDGER-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0a",
+      "owner_review_required": false,
+      "next_sprint": "WIN-RUST-PATH-RESTORE-1",
+      "notes": "Machine-parseable sprint ledger for automated sprint tracking and audit"
+    },
+    {
+      "sprint_id": "WIN-RUST-PATH-RESTORE-1",
+      "status": "sealed",
+      "commit": "44d1bcf",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-RUST-PATH-RESTORE-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-RUST-PATH-RESTORE-1.md",
+      "primary_files": [
+        "docs/sprints/WIN-RUST-PATH-RESTORE-1.md",
+        "docs/receipts/WIN-RUST-PATH-RESTORE-1-RECEIPT.md"
+      ],
+      "category": "maintenance",
+      "phase": "0b",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-ACTION-RECEIPTS-1",
+      "notes": "Restored .cargo\\bin\\ proxy shims; rustc 1.96.0, cargo 1.96.0 accessible from PATH; baseline-diff rust_version OK"
+    },
+    {
+      "sprint_id": "WIN-HARNESS-ACTION-RECEIPTS-1",
+      "status": "sealed",
+      "commit": "5dc4d55",
+      "pushed": true,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-HARNESS-ACTION-RECEIPTS-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-HARNESS-ACTION-RECEIPTS-1.md",
+      "primary_files": [
+        "scripts/harness/new-action-receipt.ps1",
+        "docs/sprints/WIN-HARNESS-ACTION-RECEIPTS-1.md",
+        "docs/receipts/WIN-HARNESS-ACTION-RECEIPTS-1-RECEIPT.md"
+      ],
+      "category": "harness",
+      "phase": "0b",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-CUSTODY-LEDGER-1",
+      "notes": "Granular action receipt generator for discrete harness actions with deterministic Markdown + optional JSON output, 9 recognized action types, 12 acceptance gates passed"
+    },
+    {
+      "sprint_id": "WIN-MULTIPLATFORM-LIBRARIAN-PLANNING-1",
+      "status": "sealed",
+      "commit": "05aabee",
+      "pushed": false,
+      "branch": "main",
+      "receipt_path": "docs/receipts/WIN-MULTIPLATFORM-LIBRARIAN-PLANNING-1-RECEIPT.md",
+      "sprint_doc_path": "docs/sprints/WIN-MULTIPLATFORM-LIBRARIAN-PLANNING-1.md",
+      "primary_files": [
+        "docs/planning/WIN-MULTIPLATFORM-LIBRARIAN-PLANNING.md",
+        "docs/planning/WIN-MULTINODE-MCP-DOCUMENT-CUSTODY-NOTES.md",
+        "docs/planning/WIN-MAC-REWRITE-PORTABILITY-IMPACT.md",
+        "docs/planning/WIN-CROSSPLATFORM-ALGORITHM-PORTABILITY.md"
+      ],
+      "category": "planning",
+      "phase": "0b",
+      "owner_review_required": false,
+      "next_sprint": "WIN-HARNESS-CUSTODY-LEDGER-1",
+      "notes": "Windows-side planning docs for multiplatform Librarian: node roles, MCP custody, Mac rewrite portability, cross-platform algorithm portability"
+    }
+  ]
+}

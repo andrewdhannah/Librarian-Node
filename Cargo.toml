@@ -1,0 +1,26 @@
+[workspace]
+members = [
+    "librarian-contracts",
+    "librarian-core",
+    "librarian-node",
+]
+
+resolver = "2"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# HTTP client for bridge communication
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# Async utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4"] }
+
+# Hashing for fixture and rule integrity
+sha2 = "0.10"
+
+# Error handling
+anyhow = "1"

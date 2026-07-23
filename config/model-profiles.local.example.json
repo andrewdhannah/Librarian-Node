@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "description": "EXAMPLE machine-local model profile overrides",
+    "sprint": "WIN-STARTUP-FILES-CUSTODY-1",
+    "contract": "EXAMPLE ONLY — copy to config/model-profiles.local.json and edit",
+    "authority": "advisory_only"
+  },
+  "defaults": {
+    "binary": "G:\\OpenWork\\librarian-runtime-node\\runtime\\llama.cpp\\llama-server.exe",
+    "gguf_root": "G:\\llama.cpp\\models"
+  },
+  "profiles": [
+    {
+      "alias": "phi-4",
+      "model_path": "G:\\llama.cpp\\models\\microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+      "launch_command": "llama-server.exe -m \"G:\\llama.cpp\\models\\microsoft_Phi-4-mini-instruct-Q4_K_M.gguf\" -p 9120 -c 4096 -ngl 99 -n 512 --alias \"phi-4\""
+    },
+    {
+      "alias": "qwen-coder",
+      "model_path": "G:\\llama.cpp\\models\\qwen2.5-coder-1.5b-instruct-q8_0.gguf",
+      "launch_command": "llama-server.exe -m \"G:\\llama.cpp\\models\\qwen2.5-coder-1.5b-instruct-q8_0.gguf\" -p 9121 -c 4096 -ngl 99 -n 512 --alias \"qwen-coder\""
+    },
+    {
+      "alias": "llama-3.2",
+      "model_path": "G:\\llama.cpp\\models\\Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+      "launch_command": "llama-server.exe -m \"G:\\llama.cpp\\models\\Llama-3.2-3B-Instruct-Q5_K_M.gguf\" -p 9122 -c 4096 -ngl 80 -n 512 --alias \"llama-3.2\""
+    },
+    {
+      "alias": "qwen3",
+      "model_path": "G:\\llama.cpp\\models\\Qwen_Qwen3-4B-Q4_K_M.gguf",
+      "launch_command": "llama-server.exe -m \"G:\\llama.cpp\\models\\Qwen_Qwen3-4B-Q4_K_M.gguf\" -p 9123 -c 4096 -ngl 80 -n 512 --alias \"qwen3\""
+    },
+    {
+      "alias": "gemma-3",
+      "model_path": "G:\\llama.cpp\\models\\gemma-3-4b-it-Q4_K_M.gguf",
+      "launch_command": "llama-server.exe -m \"G:\\llama.cpp\\models\\gemma-3-4b-it-Q4_K_M.gguf\" -p 9124 -c 4096 -ngl 80 -n 512 --alias \"gemma-3\""
+    }
+  ]
+}

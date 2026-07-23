@@ -1,0 +1,53 @@
+﻿{
+  "profiles": [
+    {
+      "alias": "phi-4",
+      "task_classes": [
+        "general_advisory",
+        "summarization_advisory"
+      ],
+      "verified": true,
+      "port": 9120,
+      "model_file": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf"
+    },
+    {
+      "alias": "qwen-coder",
+      "task_classes": [
+        "code_advisory",
+        "fallback_small_model"
+      ],
+      "verified": true,
+      "port": 9121,
+      "model_file": "qwen2.5-coder-1.5b-instruct-q8_0.gguf"
+    },
+    {
+      "alias": "llama-3.2",
+      "task_classes": [
+        "general_advisory"
+      ],
+      "verified": true,
+      "port": 9122,
+      "model_file": "Llama-3.2-3B-Instruct-Q5_K_M.gguf"
+    },
+    {
+      "alias": "qwen3",
+      "task_classes": [
+        "general_advisory",
+        "reasoning"
+      ],
+      "verified": true,
+      "port": 9123,
+      "model_file": "Qwen_Qwen3-4B-Q4_K_M.gguf"
+    },
+    {
+      "alias": "gemma-3",
+      "task_classes": [
+        "general_advisory"
+      ],
+      "verified": true,
+      "port": 9124,
+      "model_file": "gemma-3-4b-it-Q4_K_M.gguf"
+    }
+  ],
+  "authority": "advisory_only"
+}

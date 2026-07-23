@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-ls-001",
+  "contract_version": "0.1",
+  "workload_type": "long_session_continuation",
+  "selected_context_route": "ram_cache",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "stale_low_risk",
+  "provenance_state": "verified",
+  "governance_outcome": "warning",
+  "estimated_latency_ms": 15.50,
+  "performance_sacrificed_for_evidence": false,
+  "reason_selected": "Long session continuation uses recent turn window with high stale tolerance. Stale cache is acceptable for this workload.",
+  "alternatives_rejected": [
+    {
+      "route": "recomputation_from_source",
+      "reason": "Recomputation is 300x more expensive; stale cache is acceptable for long continuation"
+    },
+    {
+      "route": "compressed_recall_packet",
+      "reason": "Recall packet is more expensive than RAM cache for short appends with high reuse"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": false,
+    "requires_current_test_state": false,
+    "requires_canonical_source": false,
+    "allows_stale_context": true
+  },
+  "receipt_summary": {
+    "label": "RAM cache selected for long session continuation",
+    "detail": "Stale cache accepted with warning. Long continuation workload tolerates degraded freshness.",
+    "risk": "low"
+  }
+}

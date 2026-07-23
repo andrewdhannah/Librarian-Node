@@ -1,0 +1,89 @@
+{
+  "runtime_context_decision_contract_version": "0.1",
+  "request_id": "ctx-input-sprint-closeout-001",
+  "advisory": true,
+  "production_effects_allowed": false,
+  "model_route": {
+    "selected_runtime_profile": "windows_runtime_node",
+    "selected_model_profile": "phi-4",
+    "backend_state": "unavailable",
+    "fit": "suitable",
+    "estimated_runtime_cost_ms": 0,
+    "reason_selected": "Selected phi-4 (2.32 GB Q4_K_M. General advisory. Clean output.) for Sprint Closeout workload.",
+    "limitations": "2.32 GB Q4_K_M. General advisory. Clean output."
+  },
+  "context_route": {
+    "selected_route": "canonical_evidence_read",
+    "estimated_latency_ms": 70.9,
+    "all_route_latencies": {
+      "canonical_evidence_read": 70.9,
+      "compressed_recall_packet": 4.18,
+      "ram_cache": 0.28,
+      "ssd_cache": 0.28,
+      "recomputation_from_source": 500.0
+    },
+    "freshness_state": "verified_current",
+    "provenance_state": "verified",
+    "governance_outcome": "safe",
+    "performance_sacrificed_for_evidence": true
+  },
+  "degraded_node_state": {
+    "node_health": "stopped",
+    "last_check_latency_ms": 4015.3,
+    "timeout_ms": 5000,
+    "measured_penalty_ms": 4016.0,
+    "recommended_action": "avoid_remote_route",
+    "allowed_remote_use": false,
+    "reason": "LibrarianRunTimeNode service is Stopped. Measured TCP timeout: ~4016ms."
+  },
+  "decision_summary": {
+    "workload_type": "sprint_closeout",
+    "selected_model": "phi-4",
+    "selected_context_route": "canonical_evidence_read",
+    "estimated_total_latency_ms": 70.9,
+    "governance_outcome": "safe"
+  },
+  "receipt_consumption": {
+    "route_summary": "canonical_evidence_read selected for Sprint Closeout",
+    "selected_model_route": {
+      "profile": "phi-4",
+      "backend_state": "unavailable",
+      "fit": "suitable"
+    },
+    "selected_context_route": {
+      "route": "canonical_evidence_read",
+      "estimated_latency_ms": 70.9,
+      "governance_outcome": "safe"
+    },
+    "governance_outcome": "safe",
+    "evidence_quality": "verified_current",
+    "performance_sacrificed_for_evidence": true,
+    "degraded_node_summary": {
+      "node_health": "stopped",
+      "recommended_action": "avoid_remote_route"
+    },
+    "rejected_alternatives": [
+      {
+        "route": "compressed_recall_packet",
+        "reason": "Governance requires fresh evidence for sprint_closeout."
+      },
+      {
+        "route": "ram_cache",
+        "reason": "Provenance too weak for sprint_closeout evidence requirements."
+      }
+    ],
+    "receipt_text": "Sprint Closeout routed via canonical_evidence_read (71ms). Performance was sacrificed to satisfy live_git_test_state evidence requirements. Node is stopped — remote routing avoided."
+  },
+  "forbidden_actions_checked": [
+    "start_process",
+    "stop_process",
+    "select_model",
+    "execute_model",
+    "modify_router_config",
+    "modify_model_profiles",
+    "open_network_listener",
+    "change_bind_host",
+    "write_runtime_state",
+    "apply_context_route"
+  ]
+}

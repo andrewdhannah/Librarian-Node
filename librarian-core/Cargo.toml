@@ -1,0 +1,22 @@
+[package]
+name = "librarian-core"
+version = "0.1.0"
+edition = "2021"
+description = "Canonical authority implementation — qualification, governance, provenance, routing, capability"
+
+[dependencies]
+librarian-contracts = { path = "../librarian-contracts" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+sha2 = { workspace = true }
+reqwest = { workspace = true }
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+[dev-dependencies]
+tempfile = "3"
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"

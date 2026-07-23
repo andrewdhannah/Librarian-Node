@@ -1,0 +1,177 @@
+{
+    "_meta":  {
+                   "description":  "All 5 verified model profiles for Big Pickle router",
+                   "generated":  "2026-06-20",
+"source": "WIN-MODEL-CONTEXT-FIT-2 + REDUCED-OFFLOAD-FIT-1 + FIT-EVIDENCE-RECONCILE-1 + WIN-RUNTIME-PROFILES-CLEANUP-1",
+                   "authority":  "advisory_only",
+                   "custody_note": "defaults.binary, defaults.gguf_root, each profile's model_path, and each profile's launch_command contain machine-local absolute paths (G:\\...). These are specific to this Windows workstation. For portability, see config/model-profiles.local.example.json and WIN-STARTUP-FILES-CUSTODY-1."
+               },
+    "defaults":  {
+                     "backend":  "vulkan",
+                     "ngl":  99,
+                     "context":  1024,
+                     "max_tokens":  512,
+                     "binary":  "G:\\OpenWork\\librarian-runtime-node\\runtime\\llama.cpp\\llama-server.exe",
+                     "gguf_root":  "G:\\llama.cpp\\models"
+                 },
+    "profiles":  [
+                     {
+                         "alias":  "phi-4",
+                         "model_file":  "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+                         "model_path":  "G:\\llama.cpp\\models\\microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+                         "gguf_size_gb":  2.32,
+                         "backend":  "vulkan",
+                         "ngl":  99,
+                         "context":  4096,
+                         "port":  9120,
+                         "launch_command":  "llama-server.exe -m \"G:\\llama.cpp\\models\\microsoft_Phi-4-mini-instruct-Q4_K_M.gguf\" -p 9120 -c 4096 -ngl 99 -n 512 --alias \"phi-4\"",
+                         "task_classes":  [
+                                              "general_advisory",
+                                              "summarization_advisory"
+                                          ],
+                         "verified_status":  "verified",
+                         "evidence_path":  "fixtures/windows-runtime-node/model-fit/evidence/phi-4-ngl99.json",
+                         "verified_context":  4096,
+                         "verified_ngl":  99,
+                         "stability":  "stable",
+                         "requires_reduced_offload":  false,
+                         "notes":  "2.32 GB Q4_K_M. General advisory model. Clean output, no preamble or reasoning traces. Stable at ngl=99 up to context 4096.",
+                         "authority_status":  "advisory_only",
+                         "limitations":  "Safe up to 4096 context at ngl=99.",
+                         "known_behavior":  "Clean output, no preamble or reasoning traces.",
+                         "test_cells":  [
+                                            "phi-4 ngl=20",
+                                            "phi-4 ngl=40",
+                                            "phi-4 ngl=60",
+                                            "phi-4 ngl=80",
+                                            "phi-4 ngl=99"
+                                        ]
+                     },
+                     {
+                         "alias":  "qwen-coder",
+                         "model_file":  "qwen2.5-coder-1.5b-instruct-q8_0.gguf",
+                         "model_path":  "G:\\llama.cpp\\models\\qwen2.5-coder-1.5b-instruct-q8_0.gguf",
+                         "gguf_size_gb":  1.76,
+                         "backend":  "vulkan",
+                         "ngl":  99,
+                         "context":  4096,
+                         "port":  9121,
+                         "launch_command":  "llama-server.exe -m \"G:\\llama.cpp\\models\\qwen2.5-coder-1.5b-instruct-q8_0.gguf\" -p 9121 -c 4096 -ngl 99 -n 512 --alias \"qwen-coder\"",
+                         "task_classes":  [
+                                              "code_advisory",
+                                              "fallback_small_model"
+                                          ],
+                         "verified_status":  "verified",
+                         "evidence_path":  "fixtures/windows-runtime-node/model-fit/evidence/qwen-coder-ngl99.json",
+                         "verified_context":  4096,
+                         "verified_ngl":  99,
+                         "stability":  "stable",
+                         "requires_reduced_offload":  false,
+                         "notes":  "1.76 GB Q8_0. Best for code tasks. 1.5B params allows full offload at full context on RX 570 4GB.",
+                         "authority_status":  "advisory_only",
+                         "limitations":  "1.5B params; best for code tasks. Safe up to 4096 context at ngl=99.",
+                         "known_behavior":  "Clean output. Can handle larger context at ngl=99 due to small model size.",
+                         "test_cells":  [
+                                            "qwen-coder ngl=20",
+                                            "qwen-coder ngl=40",
+                                            "qwen-coder ngl=60",
+                                            "qwen-coder ngl=80",
+                                            "qwen-coder ngl=99"
+                                        ]
+                     },
+                     {
+                         "alias":  "llama-3.2",
+                         "model_file":  "Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+                         "model_path":  "G:\\llama.cpp\\models\\Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+                         "gguf_size_gb":  2.16,
+                         "backend":  "vulkan",
+                         "ngl":  80,
+                         "context":  4096,
+                         "port":  9122,
+                         "launch_command":  "llama-server.exe -m \"G:\\llama.cpp\\models\\Llama-3.2-3B-Instruct-Q5_K_M.gguf\" -p 9122 -c 4096 -ngl 80 -n 512 --alias \"llama-3.2\"",
+                         "task_classes":  [
+                                              "general_advisory"
+                                          ],
+                         "verified_status":  "verified",
+                         "evidence_path":  "fixtures/windows-runtime-node/model-fit/evidence/llama-3.2-ngl80.json",
+                         "verified_context":  4096,
+                         "verified_ngl":  80,
+                         "stability":  "conditional",
+                         "requires_reduced_offload":  true,
+                         "notes":  "2.16 GB Q5_K_M. 3B params. OOM at ngl=99 on RX 570 4GB. ngl=80 stable up to context 4096. ngl values between 80-99 untested.",
+                         "authority_status":  "advisory_only",
+                         "limitations":  "ngl=99 OOM at any context on RX 570 4GB. Reduced to ngl=80. Safe up to 4096 context at ngl=80. 3B params at Q5_K_M.",
+                         "known_behavior":  "Clean output. Good quality-to-size ratio. Stable at ngl=80, context up to 4096.",
+                         "test_cells":  [
+                                            "llama-3.2 ngl=20",
+                                            "llama-3.2 ngl=40",
+                                            "llama-3.2 ngl=60",
+                                            "llama-3.2 ngl=80",
+                                            "llama-3.2 ngl=99"
+                                        ]
+                     },
+                     {
+                         "alias":  "qwen3",
+                         "model_file":  "Qwen_Qwen3-4B-Q4_K_M.gguf",
+                         "model_path":  "G:\\llama.cpp\\models\\Qwen_Qwen3-4B-Q4_K_M.gguf",
+                         "gguf_size_gb":  2.33,
+                         "backend":  "vulkan",
+                         "ngl":  80,
+                         "context":  4096,
+                         "port":  9123,
+                         "launch_command":  "llama-server.exe -m \"G:\\llama.cpp\\models\\Qwen_Qwen3-4B-Q4_K_M.gguf\" -p 9123 -c 4096 -ngl 80 -n 512 --alias \"qwen3\"",
+                         "task_classes":  [
+                                              "general_advisory",
+                                              "reasoning"
+                                          ],
+                         "verified_status":  "verified",
+                         "evidence_path":  "fixtures/windows-runtime-node/model-fit/evidence/qwen3-ngl80.json",
+                         "verified_context":  4096,
+                         "verified_ngl":  80,
+                         "stability":  "conditional",
+                         "requires_reduced_offload":  true,
+                         "notes":  "2.33 GB Q4_K_M. 4B params. OOM at ngl=99 on RX 570 4GB. ngl=80 stable up to context 4096. Outputs <think> reasoning blocks. ngl values between 80-99 untested.",
+                         "authority_status":  "advisory_only",
+                         "limitations":  "ngl=99 OOM at any context on RX 570 4GB. Reduced to ngl=80. Safe up to 4096 context at ngl=80. Q4_K_M quantization.",
+                         "known_behavior":  "Outputs <think> reasoning blocks before final answer. 4B params. Stable at ngl=80, context up to 4096.",
+                         "test_cells":  [
+                                            "qwen3 ngl=20",
+                                            "qwen3 ngl=40",
+                                            "qwen3 ngl=60",
+                                            "qwen3 ngl=80",
+                                            "qwen3 ngl=99"
+                                        ]
+                     },
+                     {
+                         "alias":  "gemma-3",
+                         "model_file":  "gemma-3-4b-it-Q4_K_M.gguf",
+                         "model_path":  "G:\\llama.cpp\\models\\gemma-3-4b-it-Q4_K_M.gguf",
+                         "gguf_size_gb":  2.32,
+                         "backend":  "vulkan",
+                         "ngl":  80,
+                         "context":  4096,
+                         "port":  9124,
+                         "launch_command":  "llama-server.exe -m \"G:\\llama.cpp\\models\\gemma-3-4b-it-Q4_K_M.gguf\" -p 9124 -c 4096 -ngl 80 -n 512 --alias \"gemma-3\"",
+                         "task_classes":  [
+                                              "general_advisory"
+                                          ],
+                         "verified_status":  "verified",
+                         "evidence_path":  "fixtures/windows-runtime-node/model-fit/evidence/gemma-3-ngl80.json",
+                         "verified_context":  4096,
+                         "verified_ngl":  80,
+                         "stability":  "conditional",
+                         "requires_reduced_offload":  true,
+                         "notes":  "2.32 GB Q4_K_M. 4B params. OOM at ngl=99 on RX 570 4GB. ngl=80 stable up to context 4096. Google Gemma 3 instruct. ngl values between 80-99 untested.",
+                         "authority_status":  "advisory_only",
+                         "limitations":  "ngl=99 OOM at any context on RX 570 4GB. Reduced to ngl=80. Safe up to 4096 context at ngl=80. Q4_K_M quantization.",
+                         "known_behavior":  "Clean output. Google Gemma 3 4B instruct.",
+                         "test_cells":  [
+                                            "gemma-3 ngl=20",
+                                            "gemma-3 ngl=40",
+                                            "gemma-3 ngl=60",
+                                            "gemma-3 ngl=80",
+                                            "gemma-3 ngl=99"
+                                        ]
+                     }
+                 ]
+}

@@ -1,0 +1,55 @@
+{
+  "status": "ok",
+  "active_profile": "qwen-coder",
+  "profiles_registered": 5,
+  "runtimes_alive": 1,
+  "uptime_seconds": 275,
+  "authority": "advisory_only",
+  "profiles": {
+    "phi-4": {
+      "alias": "phi-4",
+      "state": "stopped",
+      "pid": null,
+      "port": 9120,
+      "uptime_seconds": null,
+      "health_fail_count": 0,
+      "error": null
+    },
+    "qwen-coder": {
+      "alias": "qwen-coder",
+      "state": "healthy",
+      "pid": 4052,
+      "port": 9121,
+      "uptime_seconds": 74,
+      "health_fail_count": 0,
+      "error": null
+    },
+    "llama-3.2": {
+      "alias": "llama-3.2",
+      "state": "stopped",
+      "pid": null,
+      "port": 9122,
+      "uptime_seconds": null,
+      "health_fail_count": 0,
+      "error": null
+    },
+    "qwen3": {
+      "alias": "qwen3",
+      "state": "stopped",
+      "pid": null,
+      "port": 9123,
+      "uptime_seconds": null,
+      "health_fail_count": 0,
+      "error": null
+    },
+    "gemma-3": {
+      "alias": "gemma-3",
+      "state": "stopped",
+      "pid": null,
+      "port": 9124,
+      "uptime_seconds": null,
+      "health_fail_count": 0,
+      "error": null
+    }
+  }
+}

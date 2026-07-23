@@ -1,0 +1,22 @@
+{
+  "runtime_context_decision_contract_version": "0.1",
+  "request_id": "ctx-weak-provenance-001",
+  "advisory": true,
+  "route_summary": "ram_cache selected for Receipt Generation",
+  "selected_model_route": {
+    "profile": "phi-4",
+    "backend_state": "unavailable",
+    "fit": "suitable"
+  },
+  "selected_context_route": {
+    "route": "ram_cache",
+    "estimated_latency_ms": 0.28,
+    "governance_outcome": "safe"
+  },
+  "governance_outcome": "safe",
+  "evidence_quality": "weak",
+  "performance_sacrificed_for_evidence": false,
+  "rejected_alternatives": [],
+  "receipt_text": "Receipt Generation routed via ram_cache (0.28ms). No performance sacrificed. Weak provenance accepted for receipt_generation.",
+  "_invalid_reason": "Weak provenance cannot be marked receipt-safe for receipt_generation. receipt_generation requires canonical_evidence_read per governance mandate from PROTOTYPE-1."
+}

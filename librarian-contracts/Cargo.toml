@@ -1,0 +1,14 @@
+[package]
+name = "librarian-contracts"
+version = "0.1.0"
+edition = "2021"
+description = "Neutral packet contracts for LibrarianOS Core/Node communication. No database, no runtime, no authority logic."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+sha2 = { workspace = true }
+reqwest = { workspace = true }

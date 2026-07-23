@@ -1,0 +1,14 @@
+{
+  "status": "started",
+  "port": 9130,
+  "profiles_loaded": 5,
+  "profiles": [
+    "phi-4",
+    "qwen-coder",
+    "llama-3.2",
+    "qwen3",
+    "gemma-3"
+  ],
+  "authority": "advisory_only",
+  "timestamp": "2026-06-19T08:08:18.663945+00:00"
+}

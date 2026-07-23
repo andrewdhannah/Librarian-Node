@@ -1,0 +1,7 @@
+{
+  "status": "refused",
+  "reason": "runtime_unhealthy",
+  "detail": "Runtime for profile 'qwen-coder' on port 9121 is not healthy.",
+  "authority": "advisory_only",
+  "timestamp": "2026-06-19T08:13:08.756755+00:00"
+}

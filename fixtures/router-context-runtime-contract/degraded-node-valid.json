@@ -1,0 +1,31 @@
+{
+  "runtime_context_decision_contract_version": "0.1",
+  "request_id": "ctx-degraded-check-001",
+  "advisory": true,
+  "production_effects_allowed": false,
+  "node_health": "stopped",
+  "last_check_latency_ms": 4015.3,
+  "timeout_ms": 5000,
+  "measured_penalty_ms": 4016.0,
+  "recommended_action": "avoid_remote_route",
+  "allowed_remote_use": false,
+  "reason": "LibrarianRunTimeNode service is Stopped. Measured TCP timeout: ~4016ms from MAC/WIN-ROUTER-CONTEXT-MEASURE-1.",
+  "context_route": {
+    "selected_route": "canonical_evidence_read",
+    "estimated_latency_ms": 70.9,
+    "governance_outcome": "safe",
+    "performance_sacrificed_for_evidence": true
+  },
+  "forbidden_actions_checked": [
+    "start_process",
+    "stop_process",
+    "select_model",
+    "execute_model",
+    "modify_router_config",
+    "modify_model_profiles",
+    "open_network_listener",
+    "change_bind_host",
+    "write_runtime_state",
+    "apply_context_route"
+  ]
+}

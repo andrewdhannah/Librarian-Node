@@ -1,0 +1,19 @@
+{
+    "result":  "PASS",
+    "working_tree_after":  "Clean",
+    "schema":  "action-receipt/v1",
+    "generated_at":  "DETERMINISTIC",
+    "exit_code":  0,
+    "allowed_mutation_scope":  "scripts/harness/, docs/sprints/, docs/receipts/",
+    "evidence_paths":  "scripts/harness/pre-mutation-check.ps1",
+    "command_invoked":  ".\\scripts\\harness\\pre-mutation-check.ps1 -ExpectedHead 44d1bcf",
+    "custody_class":  "controlled_mutation",
+    "notes":  "All 11 pre-mutation checks passed",
+    "working_tree_before":  "Clean",
+    "forbidden_mutation_scope":  "rust-router/, runtime/bin/, config/, router/, models/",
+    "action_type":  "preflight_check",
+    "sprint_id":  "WIN-HARNESS-ACTION-RECEIPTS-1",
+    "ending_head":  "44d1bcf",
+    "starting_head":  "44d1bcf",
+    "action_id":  "WIN-HARNESS-AR-PREFLIGHT"
+}

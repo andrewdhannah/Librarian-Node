@@ -1,0 +1,25 @@
+{
+  "$schema": "./runtime-node.schema.json",
+  "comment": "Copy this to runtime-node.local.json and edit for your environment.",
+  "node": {
+    "hostname": "localhost",
+    "description": "Windows desktop workstation"
+  },
+  "llama": {
+    "binary_path": "G:\\openwork\\librarian-runtime-node\\runtime\\llama.cpp\\main.exe",
+    "model_path": "G:\\openwork\\librarian-runtime-node\\models\\<your-model>.gguf",
+    "host": "0.0.0.0",
+    "port": 8080,
+    "n_gpu_layers": 99,
+    "ctx_size": 4096,
+    "threads": 8,
+    "extra_args": []
+  },
+  "health": {
+    "endpoint": "http://localhost:8080/health",
+    "timeout_seconds": 10
+  },
+  "inventory": {
+    "fixtures_root": "G:\\openwork\\thelibrarian\\fixtures\\windows-runtime-node"
+  }
+}

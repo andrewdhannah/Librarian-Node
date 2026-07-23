@@ -1,0 +1,103 @@
+{
+  "decision_id": "decision-ce4c556f",
+  "timestamp": "2026-06-28T04:55:16.342067+00:00",
+  "sprint_id": "MAC/WIN-ROUTER-CONTEXT-PROTOTYPE-1",
+  "prototype_status": "non-production \u2014 mock decision only",
+  "hardware_profile": "windows_runtime_node",
+  "node_health": "stopped",
+  "model_route": {
+    "selected_runtime_profile": "windows_runtime_node",
+    "selected_model_profile": "phi-4",
+    "backend_state": "unavailable",
+    "fit": "suitable",
+    "estimated_runtime_cost_ms": 0,
+    "reason_selected": "Selected phi-4 (2.32 GB Q4_K_M. General advisory. Clean output.) for Validation workload. Task class: general_advisory. Backend state: unavailable (LibrarianRunTimeNode is stopped).",
+    "alternatives_rejected": [
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "qwen-coder",
+        "reason": "qwen-coder does not match preferred task class general_advisory."
+      },
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "llama-3.2",
+        "reason": "Alternative llama-3.2 supports general_advisory but phi-4 is preferred for this workload."
+      },
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "qwen3",
+        "reason": "Alternative qwen3 supports general_advisory but phi-4 is preferred for this workload."
+      },
+      {
+        "runtime_profile": "windows_runtime_node",
+        "model_profile": "gemma-3",
+        "reason": "Alternative gemma-3 supports general_advisory but phi-4 is preferred for this workload."
+      },
+      {
+        "runtime_profile": "mac_coordinator",
+        "reason": "Coordinator should not perform this runtime task. Mac profile not measured in measurement sprint."
+      }
+    ],
+    "limitations": "2.32 GB Q4_K_M. General advisory. Clean output."
+  },
+  "context_route": {
+    "route_id": "ctx-route-val-3c5b48a6",
+    "contract_version": "0.1",
+    "workload_type": "validation",
+    "selected_context_route": "canonical_evidence_read",
+    "selected_runtime_profile": "windows_runtime_node",
+    "freshness_state": "verified_current",
+    "provenance_state": "verified",
+    "governance_outcome": "safe",
+    "estimated_latency_ms": 70.9,
+    "performance_sacrificed_for_evidence": true,
+    "reason_selected": "Selected canonical_evidence_read for Validation workload. Measured latency: ~70.90ms. Freshness: verified_current. Provenance: verified. Governance: safe.",
+    "alternatives_rejected": [
+      {
+        "route": "ram_cache",
+        "reason": "Local ram_cache costs ~4.00ms (measured warm read). Governance/evidence requirements favor canonical_evidence_read for validation."
+      },
+      {
+        "route": "recomputation_from_source",
+        "reason": "Route recomputation_from_source costs ~500.0ms. Selected canonical_evidence_read (70.9ms) as better fit."
+      },
+      {
+        "route": "compressed_recall_packet",
+        "reason": "Compressed recall packet local processing costs ~3.82ms (measured). Selected canonical_evidence_read (70.9ms) for this workload."
+      },
+      {
+        "route": "ssd_cache",
+        "reason": "Local ssd_cache costs ~14.65ms (measured warm read). Governance/evidence requirements favor canonical_evidence_read for validation."
+      }
+    ],
+    "evidence_requirements": {
+      "requires_current_git_state": true,
+      "requires_current_test_state": true,
+      "requires_canonical_source": false,
+      "allows_stale_context": false
+    },
+    "receipt_summary": {
+      "label": "canonical_evidence_read selected for Validation",
+      "detail": "Performance was sacrificed to satisfy current_test_output evidence requirements. Canonical evidence read (71ms) used instead of faster cache path.",
+      "risk": "medium"
+    },
+    "_measured_costs_used": {
+      "route": "canonical_evidence_read",
+      "estimated_latency_ms": 70.9,
+      "all_route_latencies": {
+        "canonical_evidence_read": 70.9,
+        "ram_cache": 4.0,
+        "recomputation_from_source": 500.0,
+        "compressed_recall_packet": 3.82,
+        "ssd_cache": 14.65
+      }
+    }
+  },
+  "decision_summary": {
+    "workload_type": "validation",
+    "selected_model": "phi-4",
+    "selected_context_route": "canonical_evidence_read",
+    "estimated_total_latency_ms": 70.9,
+    "governance_outcome": "safe"
+  }
+}

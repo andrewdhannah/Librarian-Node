@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "description": "MCP tool permission matrix for The Librarian runtime node",
+    "sprint": "WIN-RUNTIME-DRY-RUN-GAP-CLOSE-1",
+    "authority": "advisory_only",
+    "updated": "2026-06-28",
+    "contract": "No agent tool may mark verification as final. Human verification is the final authority for all custody operations. No tool entry grants can_verify=true."
+  },
+  "rules": {
+    "agents_can_mark_verified": false,
+    "human_verification_is_final": true
+  },
+  "tools": {
+    "librarian_checkin": {
+      "can_verify": false,
+      "description": "Check in an item/customer from custody",
+      "requires_human_verification": true
+    },
+    "librarian_checkout": {
+      "can_verify": false,
+      "description": "Check out an item/customer into custody",
+      "requires_human_verification": true
+    },
+    "librarian_checkpoint_work_order": {
+      "can_verify": false,
+      "description": "Save a work order checkpoint",
+      "requires_human_verification": false
+    },
+    "librarian_close_work_order": {
+      "can_verify": false,
+      "description": "Close a work order",
+      "requires_human_verification": true
+    },
+    "librarian_diverge": {
+      "can_verify": false,
+      "description": "Fork/divergence for exploration",
+      "requires_human_verification": false
+    },
+    "librarian_generate_doc": {
+      "can_verify": false,
+      "description": "Generate documentation artifacts",
+      "requires_human_verification": false
+    },
+    "librarian_get_item": {
+      "can_verify": false,
+      "description": "Retrieve an item record",
+      "requires_human_verification": false
+    },
+    "librarian_heartbeat": {
+      "can_verify": false,
+      "description": "Health check / keepalive",
+      "requires_human_verification": false
+    },
+    "librarian_plan_work": {
+      "can_verify": false,
+      "description": "Plan a work order scope",
+      "requires_human_verification": false
+    },
+    "librarian_resume_work_order": {
+      "can_verify": false,
+      "description": "Resume a paused work order",
+      "requires_human_verification": true
+    },
+    "librarian_search": {
+      "can_verify": false,
+      "description": "Search custodial records",
+      "requires_human_verification": false
+    },
+    "librarian_start_work_order": {
+      "can_verify": false,
+      "description": "Start a new work order",
+      "requires_human_verification": true
+    }
+  }
+}

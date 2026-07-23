@@ -35,3 +35,17 @@ Thumbs.db
 !runtime/logs/.gitkeep
 **/runtime/captures/*
 !runtime/captures/.gitkeep
+
+# Local config (machine-specific)
+*.local.json
+
+# Binary files
+*.exe
+*.dll
+*.pdb
+*.so
+*.dylib
+
+# Python cache
+__pycache__/
+*.pyc

@@ -1,0 +1,54 @@
+{
+  "runtime_context_decision_contract_version": "0.1",
+  "request_id": "ctx-forbidden-routing-001",
+  "advisory": false,
+  "production_effects_allowed": true,
+  "authorized_forbidden_actions": [
+    "apply_context_route",
+    "select_model"
+  ],
+  "model_route": {
+    "selected_runtime_profile": "windows_runtime_node",
+    "selected_model_profile": "phi-4",
+    "backend_state": "unavailable",
+    "fit": "suitable",
+    "estimated_runtime_cost_ms": 0,
+    "reason_selected": "This should be FORBIDDEN — attempting to authorize live routing.",
+    "limitations": "INVALID FIXTURE — testing contract enforcement."
+  },
+  "context_route": {
+    "selected_route": "canonical_evidence_read",
+    "estimated_latency_ms": 70.9,
+    "governance_outcome": "safe"
+  },
+  "degraded_node_state": {
+    "node_health": "stopped",
+    "allowed_remote_use": true,
+    "measured_penalty_ms": 100,
+    "recommended_action": "avoid_remote_route"
+  },
+  "decision_summary": {
+    "workload_type": "sprint_closeout",
+    "selected_model": "phi-4",
+    "selected_context_route": "canonical_evidence_read",
+    "estimated_total_latency_ms": 70.9,
+    "governance_outcome": "safe"
+  },
+  "receipt_consumption": {
+    "route_summary": "canonical_evidence_read selected for Sprint Closeout",
+    "selected_model_route": {
+      "profile": "phi-4"
+    },
+    "selected_context_route": {
+      "route": "canonical_evidence_read",
+      "estimated_latency_ms": 70.9,
+      "governance_outcome": "safe"
+    },
+    "governance_outcome": "safe",
+    "evidence_quality": "verified_current",
+    "performance_sacrificed_for_evidence": true,
+    "receipt_text": "INVALID — This receipt allows forbidden live routing actions."
+  },
+  "forbidden_actions_checked": [],
+  "_invalid_reason": "advisory is false, production_effects_allowed is true, forbidden actions are authorized, remote use allowed on stopped node with insufficient penalty"
+}

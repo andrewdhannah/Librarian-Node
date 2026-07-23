@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-rn-001",
+  "contract_version": "0.1",
+  "workload_type": "runtime_node_qualification",
+  "selected_context_route": "canonical_evidence_read",
+  "selected_runtime_profile": "windows_runtime_node",
+  "freshness_state": "verified_current",
+  "provenance_state": "verified",
+  "governance_outcome": "safe",
+  "estimated_latency_ms": 202.69,
+  "performance_sacrificed_for_evidence": false,
+  "reason_selected": "Runtime node qualification requires live node status and hardware profile. Canonical evidence read provides verified current runtime state.",
+  "alternatives_rejected": [
+    {
+      "route": "compressed_recall_packet",
+      "reason": "Recall packet may contain stale runtime state; qualification requires live verification"
+    },
+    {
+      "route": "ram_cache",
+      "reason": "RAM cache may not reflect current runtime node health"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": false,
+    "requires_current_test_state": false,
+    "requires_canonical_source": true,
+    "allows_stale_context": false
+  },
+  "receipt_summary": {
+    "label": "Canonical evidence selected for runtime node qualification",
+    "detail": "Live runtime node state verified. Stale runtime state is not acceptable for qualification.",
+    "risk": "low"
+  }
+}

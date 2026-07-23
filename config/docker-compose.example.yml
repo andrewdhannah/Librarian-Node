@@ -1,0 +1,29 @@
+# Docker Compose example for local model services.
+# This is optional. Native PowerShell scripts are enough for the first pass.
+
+services:
+  phi4:
+    image: llama-server-local
+    container_name: librarian-phi4
+    ports:
+      - "9120:8080"
+    volumes:
+      - ./models/phi4-3b-local:/models:ro
+    environment:
+      MODEL_NAME: "Phi-4 3B Local"
+      MODEL_ROLE: "general-advisory"
+      MODEL_FILE: "/models/model.gguf"
+    restart: unless-stopped
+
+  embeddings:
+    image: embedding-server-local
+    container_name: librarian-embeddings
+    ports:
+      - "9122:8080"
+    volumes:
+      - ./models/local-embeddings:/models:ro
+    environment:
+      MODEL_NAME: "Local Embeddings"
+      MODEL_ROLE: "retrieval"
+      MODEL_FILE: "/models/embedding-model.gguf"
+    restart: unless-stopped

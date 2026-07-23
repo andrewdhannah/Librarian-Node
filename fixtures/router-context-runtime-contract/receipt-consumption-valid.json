@@ -1,0 +1,36 @@
+{
+  "runtime_context_decision_contract_version": "0.1",
+  "request_id": "ctx-input-sprint-closeout-001",
+  "advisory": true,
+  "route_summary": "canonical_evidence_read selected for Sprint Closeout",
+  "selected_model_route": {
+    "profile": "phi-4",
+    "backend_state": "unavailable",
+    "fit": "suitable"
+  },
+  "selected_context_route": {
+    "route": "canonical_evidence_read",
+    "estimated_latency_ms": 70.9,
+    "governance_outcome": "safe"
+  },
+  "governance_outcome": "safe",
+  "evidence_quality": "verified_current",
+  "performance_sacrificed_for_evidence": true,
+  "degraded_node_summary": {
+    "node_health": "stopped",
+    "recommended_action": "avoid_remote_route"
+  },
+  "rejected_alternatives": [
+    {
+      "route": "compressed_recall_packet",
+      "reason": "Governance requires fresh evidence for sprint_closeout.",
+      "estimated_latency_ms": 4.18
+    },
+    {
+      "route": "ram_cache",
+      "reason": "Provenance too weak for sprint_closeout evidence requirements.",
+      "estimated_latency_ms": 0.28
+    }
+  ],
+  "receipt_text": "Sprint Closeout routed via canonical_evidence_read (71ms). Performance was sacrificed to satisfy live_git_test_state evidence requirements. Node is stopped — remote routing avoided."
+}

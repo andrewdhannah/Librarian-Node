@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-sp-001",
+  "contract_version": "0.1",
+  "workload_type": "sprint_planning",
+  "selected_context_route": "compressed_recall_packet",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "verified_current",
+  "provenance_state": "verified",
+  "governance_outcome": "safe",
+  "estimated_latency_ms": 236.0,
+  "performance_sacrificed_for_evidence": false,
+  "reason_selected": "Sprint planning uses recent status and roadmap. Recall packets preserve planning context efficiently.",
+  "alternatives_rejected": [
+    {
+      "route": "ram_cache",
+      "reason": "RAM cache is faster but does not capture the full planning context snapshot"
+    },
+    {
+      "route": "recomputation_from_source",
+      "reason": "Recomputation is unnecessary; recall packet preserves sufficient planning state"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": false,
+    "requires_current_test_state": false,
+    "requires_canonical_source": false,
+    "allows_stale_context": true
+  },
+  "receipt_summary": {
+    "label": "Recall packet selected for sprint planning",
+    "detail": "Compressed recall packet provides sufficient planning context without full recomputation.",
+    "risk": "low"
+  }
+}

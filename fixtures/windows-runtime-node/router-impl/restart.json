@@ -1,0 +1,8 @@
+﻿{
+  "status": "restarting",
+  "profile": "qwen-coder",
+  "old_pid": 4052,
+  "new_pid": 948,
+  "estimated_wait_seconds": 10,
+  "authority": "advisory_only"
+}

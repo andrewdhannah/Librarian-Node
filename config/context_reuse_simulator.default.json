@@ -1,0 +1,194 @@
+{
+  "_comment": "Context Reuse Simulator — DualPath-Inspired Context Reuse Scheduling for The Librarian",
+  "_honesty": "This is a local simulator for architecture research. No production cache behavior. No GPU/RDMA/KV acceleration claims.",
+
+  "workload": {
+    "avg_reused_context_tokens": 32700,
+    "avg_append_tokens": 429,
+    "cache_hit_rate": 0.987,
+    "num_turns_per_session": 50,
+    "shape_description": "many turns, large reused history, short appends",
+    "expected_bottleneck": "context movement / retrieval / reuse, not raw model speed"
+  },
+
+  "paths": {
+    "ram_cache": {
+      "label": "RAM Cache",
+      "base_latency_ms": 0.5,
+      "context_transfer_cost_per_token_ms": 0.0001,
+      "append_processing_cost_per_token_ms": 0.002,
+      "cache_miss_penalty_ms": 200.0,
+      "freshness_penalty_per_tick_ms": 5.0,
+      "provenance_penalty_if_unverified_ms": 50.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "ssd_cache": {
+      "label": "SSD Cache",
+      "base_latency_ms": 10.0,
+      "context_transfer_cost_per_token_ms": 0.005,
+      "append_processing_cost_per_token_ms": 0.008,
+      "cache_miss_penalty_ms": 500.0,
+      "freshness_penalty_per_tick_ms": 2.0,
+      "provenance_penalty_if_unverified_ms": 30.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "remote_windows_runtime_cache": {
+      "label": "Remote Windows Runtime Cache",
+      "base_latency_ms": 50.0,
+      "context_transfer_cost_per_token_ms": 0.02,
+      "append_processing_cost_per_token_ms": 0.015,
+      "cache_miss_penalty_ms": 1500.0,
+      "freshness_penalty_per_tick_ms": 10.0,
+      "provenance_penalty_if_unverified_ms": 100.0,
+      "lan_latency_ms": 35.0,
+      "lan_jitter_ms": 15.0,
+      "always_available": false,
+      "requires_network": true,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "recomputation": {
+      "label": "Recomputation from Source",
+      "base_latency_ms": 500.0,
+      "context_transfer_cost_per_token_ms": 0.05,
+      "append_processing_cost_per_token_ms": 0.03,
+      "cache_miss_penalty_ms": 0.0,
+      "freshness_penalty_per_tick_ms": 0.0,
+      "provenance_penalty_if_unverified_ms": 0.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": false,
+      "supports_provenance_check": false,
+      "force_fresh": true,
+      "force_provenance_verified": true
+    },
+    "compressed_recall_packet": {
+      "label": "Compressed Recall Packet",
+      "base_latency_ms": 80.0,
+      "context_transfer_cost_per_token_ms": 0.002,
+      "append_processing_cost_per_token_ms": 0.01,
+      "cache_miss_penalty_ms": 800.0,
+      "freshness_penalty_per_tick_ms": 5.0,
+      "provenance_penalty_if_unverified_ms": 60.0,
+      "compression_cost_per_token_ms": 0.001,
+      "decompression_cost_per_token_ms": 0.003,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    }
+  },
+
+  "strategies": {
+    "always_ram": {
+      "label": "Always RAM when available",
+      "description": "Attempt RAM cache first; fall back to recomputation if miss"
+    },
+    "always_ssd": {
+      "label": "Always SSD after first turn",
+      "description": "Use SSD cache from turn 2 onward; fall back to recomputation"
+    },
+    "always_remote": {
+      "label": "Always remote Windows runtime cache",
+      "description": "Always route through remote Windows runtime cache; fall back to recomputation"
+    },
+    "always_recompute": {
+      "label": "Always recompute",
+      "description": "Never use any cache; always recompute from source"
+    },
+    "always_recall_packet": {
+      "label": "Always compressed recall packet",
+      "description": "Always use compressed recall packet path"
+    },
+    "local_scheduler": {
+      "label": "Local Scheduler (smart choice)",
+      "description": "Choose best available path based on estimated latency, freshness, and provenance"
+    }
+  },
+
+  "scheduler": {
+    "weights": {
+      "freshness_tick_penalty": 1.0,
+      "provenance_penalty": 1.5,
+      "cache_miss_penalty": 1.0,
+      "network_jitter_weight": 1.2
+    },
+    "freshness_decay_per_tick": {
+      "ram_cache": 0.95,
+      "ssd_cache": 0.90,
+      "remote_windows_runtime_cache": 0.85,
+      "recomputation": 1.0,
+      "compressed_recall_packet": 0.92
+    },
+    "provenance_verified_default": false,
+    "max_freshness_ticks_before_stale": 10
+  },
+
+  "scenarios": {
+    "A_normal_session": {
+      "label": "Scenario A — Normal Long Agent Session",
+      "num_sessions": 1,
+      "num_turns": 50,
+      "reused_context_tokens": 32700,
+      "append_tokens": 429,
+      "cache_hit_rate": 0.987,
+      "freshness_decay_enabled": false,
+      "provenance_checks_enabled": false,
+      "lan_quality": "stable"
+    },
+    "B_parallel_sessions": {
+      "label": "Scenario B — Parallel Agent Sessions",
+      "num_sessions": 5,
+      "num_turns": 30,
+      "reused_context_tokens": 32700,
+      "append_tokens": 429,
+      "cache_hit_rate": 0.95,
+      "freshness_decay_enabled": false,
+      "provenance_checks_enabled": false,
+      "lan_quality": "stable",
+      "shared_context_overlap": 0.4
+    },
+    "C_stale_cache": {
+      "label": "Scenario C — Stale Cache / Provenance Risk",
+      "num_sessions": 1,
+      "num_turns": 50,
+      "reused_context_tokens": 32700,
+      "append_tokens": 429,
+      "cache_hit_rate": 0.987,
+      "freshness_decay_enabled": true,
+      "provenance_checks_enabled": true,
+      "lan_quality": "stable",
+      "stale_after_ticks": 8
+    },
+    "D_weak_runtime_link": {
+      "label": "Scenario D — Weak Windows Runtime Link",
+      "num_sessions": 1,
+      "num_turns": 50,
+      "reused_context_tokens": 32700,
+      "append_tokens": 429,
+      "cache_hit_rate": 0.987,
+      "freshness_decay_enabled": false,
+      "provenance_checks_enabled": false,
+      "lan_quality": "unstable",
+      "lan_latency_base_ms": 120,
+      "lan_jitter_ms": 60
+    },
+    "E_recall_packet_advantage": {
+      "label": "Scenario E — Recall Packet Advantage",
+      "num_sessions": 1,
+      "num_turns": 50,
+      "reused_context_tokens": 50000,
+      "append_tokens": 150,
+      "cache_hit_rate": 0.90,
+      "freshness_decay_enabled": false,
+      "provenance_checks_enabled": false,
+      "lan_quality": "stable"
+    }
+  }
+}

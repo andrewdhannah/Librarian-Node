@@ -1,0 +1,7 @@
+﻿{
+  "status": "selected",
+  "profile": "qwen-coder",
+  "port": 9121,
+  "authority": "advisory_only",
+  "task_class": "code_advisory"
+}

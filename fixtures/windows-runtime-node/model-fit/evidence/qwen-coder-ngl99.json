@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "sprint": "FIT-EVIDENCE-RECONCILE-1",
+    "method": "restart-per-config-change (correct)",
+    "date": "2026-06-20",
+    "note": "Router reads config at startup only. Each test cell stops router, changes config, restarts router to pick up new values."
+  },
+  "profile": "qwen-coder",
+  "model_file": "qwen2.5-coder-1.5b-instruct-q8_0.gguf",
+  "gguf_size_gb": 1.76,
+  "ngl": 99,
+  "context": 4096,
+  "gpu": "AMD Radeon RX 570 4GB Polaris",
+  "backend": "vulkan",
+  "test_results": [
+    {
+      "ngl": 99,
+      "context": 2048,
+      "status": "PASS",
+      "detail": "Backend healthy, chat returned OK",
+      "method": "restart-per-config-change"
+    },
+    {
+      "ngl": 99,
+      "context": 4096,
+      "status": "PASS",
+      "detail": "Backend healthy, chat returned OK",
+      "method": "restart-per-config-change"
+    }
+  ],
+  "verified_at": {
+    "ngl": 99,
+    "context": 4096
+  },
+  "verdict": "Safe up to 4096 context at ngl=99 on RX 570 4GB. 1.5B params allows full offload at full context."
+}

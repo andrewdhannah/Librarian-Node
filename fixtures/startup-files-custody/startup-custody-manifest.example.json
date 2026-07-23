@@ -1,0 +1,85 @@
+{
+  "_meta": {
+    "description": "Example startup custody manifest for WIN-STARTUP-FILES-CUSTODY-1",
+    "sprint": "WIN-STARTUP-FILES-CUSTODY-0",
+    "status": "planning_only — do not use for active service verification yet",
+    "date": "2026-06-28"
+  },
+  "expected_service_config": {
+    "name": "LibrarianRunTimeNode",
+    "start_type": "Manual",
+    "nssm": {
+      "app_path": "powershell.exe",
+      "app_parameters": "-NoProfile -ExecutionPolicy Bypass -File scripts\\start-librarian-runtime-node.ps1",
+      "app_directory": "G:\\OpenWork\\librarian-runtime-node",
+      "app_environment_extra": null
+    }
+  },
+  "expected_ports": {
+    "router": 9130,
+    "model_profiles": {
+      "phi-4": 9120,
+      "qwen-coder": 9121,
+      "llama-3.2": 9122,
+      "qwen3": 9123,
+      "gemma-3": 9124
+    },
+    "embedding": 9122,
+    "direct_llamacpp": 8080
+  },
+  "expected_environment_variables": {
+    "required": [
+      "ROUTER_PORT",
+      "BACKEND_BINARY_PATH",
+      "LOG_PATH",
+      "EVIDENCE_PATH"
+    ],
+    "optional": [
+      "ROUTER_HOST",
+      "ROUTER_AUTH_TOKEN",
+      "ROUTER_REQUIRE_AUTH",
+      "ROUTER_MAX_BODY_BYTES",
+      "HEALTH_POLL_INTERVAL_SECS",
+      "HEALTH_TIMEOUT_SECS",
+      "BACKEND_PORT_BASE",
+      "PROFILE_CONFIG_PATH"
+    ],
+    "expected_defaults": {
+      "ROUTER_PORT": "9130",
+      "ROUTER_HOST": "127.0.0.1",
+      "HEALTH_POLL_INTERVAL_SECS": "5",
+      "HEALTH_TIMEOUT_SECS": "180",
+      "PROFILE_CONFIG_PATH": "config/model-profiles.json"
+    }
+  },
+  "expected_binaries": {
+    "rust_router": "rust-router/target/release/rust-router.exe",
+    "python_router": "router/router.py",
+    "backend_llama_server": "runtime/llama.cpp/llama-server.exe",
+    "model_manager_llama_server_mini": "G:\\llama.cpp\\build_vs\\bin\\Release\\llama-server-mini.exe"
+  },
+  "expected_paths": {
+    "repo_root": "G:\\OpenWork\\librarian-runtime-node",
+    "logs": "logs/",
+    "evidence": "fixtures/windows-runtime-node/router-impl",
+    "startup_log": "logs/service-router-startup.log",
+    "router_log": "logs/rust-router-service.log",
+    "model_profiles": "config/model-profiles.json"
+  },
+  "path_casing_standard": "G:\\OpenWork (camelCase P)",
+  "known_drifts": [
+    {
+      "source": "scripts/start-librarian-runtime-node.ps1",
+      "value": "G:\\openwork",
+      "expected": "G:\\OpenWork",
+      "risk": "low (Windows case-insensitive, but maintenance drift)"
+    }
+  ],
+  "verification_steps": [
+    "Confirm NSSM config matches manifest",
+    "Confirm binary paths exist",
+    "Confirm ports are free",
+    "Confirm env vars are set",
+    "Confirm path casing is consistent"
+  ]
+}

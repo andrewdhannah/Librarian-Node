@@ -1,0 +1,26 @@
+[package]
+name = "librarian-node"
+version = "0.1.0"
+edition = "2021"
+description = "Runtime execution environment — server, process, residency, evidence, operator"
+
+[dependencies]
+librarian-contracts = { path = "../librarian-contracts" }
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4", features = ["derive"] }
+chrono = { workspace = true }
+uuid = { workspace = true }
+rusqlite = { version = "0.31", features = ["bundled"] }
+sha2 = { workspace = true }
+anyhow = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

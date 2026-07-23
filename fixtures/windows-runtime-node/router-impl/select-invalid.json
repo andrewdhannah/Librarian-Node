@@ -1,0 +1,7 @@
+﻿{
+  "status": "refused",
+  "reason": "unknown_profile",
+  "detail": "No profile registered with alias 'nonexistent'",
+  "authority": "advisory_only",
+  "timestamp": "2026-06-19T08:12:59.144100+00:00"
+}

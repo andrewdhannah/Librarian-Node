@@ -1,0 +1,492 @@
+{
+  "_comment": "Router Workload Optimizer — Librarian Workload-Aware Context Route Scheduling",
+  "_honesty": "This is a local simulator for architecture research. No production cache behavior. No GPU/RDMA/KV acceleration claims. No production router modifications.",
+
+  "context_routes": {
+    "ram_cache": {
+      "label": "RAM Cache",
+      "base_latency_ms": 0.5,
+      "context_transfer_cost_per_token_ms": 0.0001,
+      "append_processing_cost_per_token_ms": 0.002,
+      "cache_miss_penalty_ms": 200.0,
+      "freshness_penalty_per_tick_ms": 5.0,
+      "provenance_penalty_if_unverified_ms": 50.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "ssd_cache": {
+      "label": "SSD Cache",
+      "base_latency_ms": 10.0,
+      "context_transfer_cost_per_token_ms": 0.005,
+      "append_processing_cost_per_token_ms": 0.008,
+      "cache_miss_penalty_ms": 500.0,
+      "freshness_penalty_per_tick_ms": 2.0,
+      "provenance_penalty_if_unverified_ms": 30.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "remote_windows_runtime_cache": {
+      "label": "Remote Windows Runtime Cache",
+      "base_latency_ms": 50.0,
+      "context_transfer_cost_per_token_ms": 0.02,
+      "append_processing_cost_per_token_ms": 0.015,
+      "cache_miss_penalty_ms": 1500.0,
+      "freshness_penalty_per_tick_ms": 10.0,
+      "provenance_penalty_if_unverified_ms": 100.0,
+      "lan_latency_ms": 35.0,
+      "lan_jitter_ms": 15.0,
+      "always_available": false,
+      "requires_network": true,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "recomputation": {
+      "label": "Recomputation from Source",
+      "base_latency_ms": 500.0,
+      "context_transfer_cost_per_token_ms": 0.05,
+      "append_processing_cost_per_token_ms": 0.03,
+      "cache_miss_penalty_ms": 0.0,
+      "freshness_penalty_per_tick_ms": 0.0,
+      "provenance_penalty_if_unverified_ms": 0.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": false,
+      "supports_provenance_check": false,
+      "force_fresh": true,
+      "force_provenance_verified": true
+    },
+    "compressed_recall_packet": {
+      "label": "Compressed Recall Packet",
+      "base_latency_ms": 80.0,
+      "context_transfer_cost_per_token_ms": 0.002,
+      "append_processing_cost_per_token_ms": 0.01,
+      "cache_miss_penalty_ms": 800.0,
+      "freshness_penalty_per_tick_ms": 5.0,
+      "provenance_penalty_if_unverified_ms": 60.0,
+      "compression_cost_per_token_ms": 0.001,
+      "decompression_cost_per_token_ms": 0.003,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "recent_turn_window": {
+      "label": "Recent Turn Window (short-term hot cache)",
+      "base_latency_ms": 0.2,
+      "context_transfer_cost_per_token_ms": 0.00005,
+      "append_processing_cost_per_token_ms": 0.001,
+      "cache_miss_penalty_ms": 300.0,
+      "freshness_penalty_per_tick_ms": 1.0,
+      "provenance_penalty_if_unverified_ms": 20.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true
+    },
+    "canonical_evidence_read": {
+      "label": "Canonical Evidence Read (source/git artifacts)",
+      "base_latency_ms": 25.0,
+      "context_transfer_cost_per_token_ms": 0.01,
+      "append_processing_cost_per_token_ms": 0.005,
+      "cache_miss_penalty_ms": 200.0,
+      "freshness_penalty_per_tick_ms": 0.5,
+      "provenance_penalty_if_unverified_ms": 5.0,
+      "always_available": true,
+      "requires_network": false,
+      "supports_freshness_check": true,
+      "supports_provenance_check": true,
+      "always_fresh": true,
+      "always_provenance_verified": true
+    }
+  },
+
+  "hardware_profiles": {
+    "current_mac_coordinator": {
+      "label": "Current Mac Coordinator",
+      "description": "Primary development machine. Fast local I/O, good RAM, stable.",
+      "ram_read_bandwidth_tokens_per_ms": 150000,
+      "ssd_read_bandwidth_tokens_per_ms": 80000,
+      "max_concurrent_sessions": 4,
+      "lan_latency_ms": 35.0,
+      "lan_jitter_ms": 15.0,
+      "lan_quality": "stable",
+      "reciprocal_transfer_multiplier": 1.0
+    },
+    "current_windows_runtime_node": {
+      "label": "Current Windows Runtime Node",
+      "description": "Windows node for runtime execution. Good but network-dependent.",
+      "ram_read_bandwidth_tokens_per_ms": 120000,
+      "ssd_read_bandwidth_tokens_per_ms": 60000,
+      "max_concurrent_sessions": 3,
+      "lan_latency_ms": 35.0,
+      "lan_jitter_ms": 15.0,
+      "lan_quality": "stable",
+      "reciprocal_transfer_multiplier": 1.15
+    },
+    "weak_unstable_lan": {
+      "label": "Weak/Unstable LAN Profile",
+      "description": "Unstable network conditions. High jitter, variable latency.",
+      "ram_read_bandwidth_tokens_per_ms": 100000,
+      "ssd_read_bandwidth_tokens_per_ms": 50000,
+      "max_concurrent_sessions": 2,
+      "lan_latency_ms": 120.0,
+      "lan_jitter_ms": 60.0,
+      "lan_quality": "unstable",
+      "reciprocal_transfer_multiplier": 2.5
+    },
+    "stronger_future_local_gpu": {
+      "label": "Stronger Future Local GPU Node",
+      "description": "Scalability test only. Higher throughput, faster local I/O. No GPU-specific claims.",
+      "ram_read_bandwidth_tokens_per_ms": 300000,
+      "ssd_read_bandwidth_tokens_per_ms": 200000,
+      "max_concurrent_sessions": 12,
+      "lan_latency_ms": 20.0,
+      "lan_jitter_ms": 5.0,
+      "lan_quality": "stable",
+      "reciprocal_transfer_multiplier": 0.6
+    }
+  },
+
+  "governance_states": {
+    "verified_current": {
+      "description": "Cache entry is fresh and provenance-verified",
+      "latency_penalty_ms": 0,
+      "risk_score": 0,
+      "blocked": false
+    },
+    "recent_but_unverified": {
+      "description": "Recently produced but provenance not yet confirmed",
+      "latency_penalty_ms": 15,
+      "risk_score": 0.3,
+      "blocked": false
+    },
+    "stale_low_risk": {
+      "description": "Expired freshness but task can tolerate it",
+      "latency_penalty_ms": 25,
+      "risk_score": 0.5,
+      "blocked": false
+    },
+    "stale_requires_revalidation": {
+      "description": "Stale and must be revalidated before use",
+      "latency_penalty_ms": 150,
+      "risk_score": 0.8,
+      "blocked": false
+    },
+    "provenance_weak": {
+      "description": "Provenance not verified; governance risk",
+      "latency_penalty_ms": 50,
+      "risk_score": 0.7,
+      "blocked": false
+    },
+    "blocked_for_task": {
+      "description": "Hard blocked — task cannot use this cache state",
+      "latency_penalty_ms": 999999,
+      "risk_score": 1.0,
+      "blocked": true
+    }
+  },
+
+  "workload_profiles": {
+    "sprint_planning": {
+      "label": "Sprint Planning",
+      "description": "Roadmap + recent status + recall packet. Moderate freshness requirement.",
+      "typical_context_tokens": 25000,
+      "typical_append_tokens": 600,
+      "freshness_requirement": "moderate",
+      "provenance_requirement": "moderate",
+      "evidence_requirement": "status_summary",
+      "acceptable_recall_compression": 0.9,
+      "stale_cache_tolerance": "moderate",
+      "recomputation_preference": "low",
+      "remote_runtime_tolerance": "high",
+      "risk_level": "low",
+      "preferred_routes": ["compressed_recall_packet", "ram_cache", "ssd_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["compressed_recall_packet", "ram_cache", "ssd_cache", "recent_turn_window", "recomputation"],
+      "explanation": "Sprint planning uses recent status and roadmap. Recall packets preserve planning context efficiently."
+    },
+    "sprint_closeout": {
+      "label": "Sprint Closeout",
+      "description": "Strict freshness and evidence requirements. Current git/test state must dominate.",
+      "typical_context_tokens": 35000,
+      "typical_append_tokens": 400,
+      "freshness_requirement": "strict",
+      "provenance_requirement": "strict",
+      "evidence_requirement": "live_git_test_state",
+      "acceptable_recall_compression": 0.5,
+      "stale_cache_tolerance": "none",
+      "recomputation_preference": "high",
+      "remote_runtime_tolerance": "low",
+      "risk_level": "high",
+      "preferred_routes": ["canonical_evidence_read", "recomputation", "ram_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["canonical_evidence_read", "recomputation", "ram_cache", "compressed_recall_packet", "ssd_cache"],
+      "explanation": "Sprint closeout requires current git state and test results. Stale cache could cause incorrect evidence."
+    },
+    "receipt_generation": {
+      "label": "Receipt Generation",
+      "description": "Canonical evidence required. Stale or weak-provenance context should be blocked or revalidated.",
+      "typical_context_tokens": 20000,
+      "typical_append_tokens": 300,
+      "freshness_requirement": "strict",
+      "provenance_requirement": "strict",
+      "evidence_requirement": "canonical_source",
+      "acceptable_recall_compression": 0.4,
+      "stale_cache_tolerance": "none",
+      "recomputation_preference": "high",
+      "remote_runtime_tolerance": "low",
+      "risk_level": "high",
+      "preferred_routes": ["canonical_evidence_read", "recomputation"],
+      "disallowed_routes": [],
+      "route_ranking": ["canonical_evidence_read", "recomputation", "ram_cache", "compressed_recall_packet", "ssd_cache"],
+      "explanation": "Receipt generation requires canonical, provenance-verified source evidence."
+    },
+    "validation": {
+      "label": "Validation",
+      "description": "Test results must be current. Moderate context reuse.",
+      "typical_context_tokens": 28000,
+      "typical_append_tokens": 350,
+      "freshness_requirement": "high",
+      "provenance_requirement": "high",
+      "evidence_requirement": "current_test_output",
+      "acceptable_recall_compression": 0.6,
+      "stale_cache_tolerance": "low",
+      "recomputation_preference": "medium",
+      "remote_runtime_tolerance": "medium",
+      "risk_level": "medium",
+      "preferred_routes": ["canonical_evidence_read", "ram_cache", "recomputation"],
+      "disallowed_routes": [],
+      "route_ranking": ["canonical_evidence_read", "ram_cache", "recomputation", "compressed_recall_packet", "ssd_cache"],
+      "explanation": "Validation requires fresh test results. Stale test cache is unreliable."
+    },
+    "code_patch_preparation": {
+      "label": "Code Patch Preparation",
+      "description": "Current source files + recent decisions. Moderate to high freshness.",
+      "typical_context_tokens": 30000,
+      "typical_append_tokens": 500,
+      "freshness_requirement": "high",
+      "provenance_requirement": "high",
+      "evidence_requirement": "current_source",
+      "acceptable_recall_compression": 0.7,
+      "stale_cache_tolerance": "low",
+      "recomputation_preference": "medium",
+      "remote_runtime_tolerance": "medium",
+      "risk_level": "medium",
+      "preferred_routes": ["ram_cache", "canonical_evidence_read", "ssd_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["ram_cache", "canonical_evidence_read", "ssd_cache", "compressed_recall_packet", "recomputation"],
+      "explanation": "Code patch prep needs current source state and recent decision context."
+    },
+    "agent_handoff": {
+      "label": "Agent Handoff",
+      "description": "Compressed recall packet should be preferred. Preserves decisions, evidence, state, and next action.",
+      "typical_context_tokens": 32700,
+      "typical_append_tokens": 200,
+      "freshness_requirement": "moderate",
+      "provenance_requirement": "moderate",
+      "evidence_requirement": "complete_state_snapshot",
+      "acceptable_recall_compression": 0.85,
+      "stale_cache_tolerance": "moderate",
+      "recomputation_preference": "low",
+      "remote_runtime_tolerance": "high",
+      "risk_level": "low",
+      "preferred_routes": ["compressed_recall_packet", "ram_cache", "ssd_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["compressed_recall_packet", "ram_cache", "ssd_cache", "recent_turn_window", "recomputation"],
+      "explanation": "Agent handoff needs a complete state snapshot. Recall packets are purpose-built for this."
+    },
+    "long_session_continuation": {
+      "label": "Long Session Continuation",
+      "description": "High context reuse, short append, many turns. Recent window plus recall packet may beat full reload.",
+      "typical_context_tokens": 40000,
+      "typical_append_tokens": 300,
+      "freshness_requirement": "moderate",
+      "provenance_requirement": "low",
+      "evidence_requirement": "recent_window",
+      "acceptable_recall_compression": 0.8,
+      "stale_cache_tolerance": "high",
+      "recomputation_preference": "low",
+      "remote_runtime_tolerance": "high",
+      "risk_level": "low",
+      "preferred_routes": ["recent_turn_window", "compressed_recall_packet", "ram_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["recent_turn_window", "compressed_recall_packet", "ram_cache", "ssd_cache", "recomputation"],
+      "explanation": "Long continuation relies on recent window + recall. Full reload is wasteful for short appends."
+    },
+    "runtime_node_qualification": {
+      "label": "Runtime Node Qualification",
+      "description": "Live node status and hardware profile matter. Stale runtime state requires revalidation.",
+      "typical_context_tokens": 15000,
+      "typical_append_tokens": 250,
+      "freshness_requirement": "strict",
+      "provenance_requirement": "strict",
+      "evidence_requirement": "live_node_health",
+      "acceptable_recall_compression": 0.4,
+      "stale_cache_tolerance": "none",
+      "recomputation_preference": "high",
+      "remote_runtime_tolerance": "low",
+      "risk_level": "high",
+      "preferred_routes": ["canonical_evidence_read", "recomputation", "remote_windows_runtime_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["canonical_evidence_read", "remote_windows_runtime_cache", "recomputation", "ram_cache", "compressed_recall_packet"],
+      "explanation": "Runtime qualification requires live node data. Stale runtime state is invalid."
+    },
+    "ui_review_or_design_planning": {
+      "label": "UI Review / Design Planning",
+      "description": "Visual/design context tolerates some stale planning. Current screenshots preferred.",
+      "typical_context_tokens": 22000,
+      "typical_append_tokens": 800,
+      "freshness_requirement": "low",
+      "provenance_requirement": "low",
+      "evidence_requirement": "current_screenshots",
+      "acceptable_recall_compression": 0.85,
+      "stale_cache_tolerance": "high",
+      "recomputation_preference": "low",
+      "remote_runtime_tolerance": "high",
+      "risk_level": "low",
+      "preferred_routes": ["ram_cache", "compressed_recall_packet", "ssd_cache"],
+      "disallowed_routes": [],
+      "route_ranking": ["ram_cache", "compressed_recall_packet", "ssd_cache", "recent_turn_window", "recomputation"],
+      "explanation": "UI review tolerates stale design planning but prefers current screenshots when available."
+    }
+  },
+
+  "governance_rules": {
+    "freshness_tick_thresholds": {
+      "strict": 5,
+      "high": 10,
+      "moderate": 20,
+      "low": 50
+    },
+    "provenance_verification_probability": 0.85,
+    "revalidation_overhead_ms": 150
+  },
+
+  "strategies": {
+    "always_fastest_path": {
+      "label": "Always Fastest Context Path",
+      "description": "Pick the path with lowest base latency. Ignore governance entirely."
+    },
+    "always_safest_path": {
+      "label": "Always Safest Context Path",
+      "description": "Pick the path with highest provenance/freshness. Ignore latency."
+    },
+    "always_recompute_high_risk": {
+      "label": "Always Recompute for High-Risk Tasks",
+      "description": "Recompute for high-risk tasks; use fastest cache for others."
+    },
+    "always_recall_packet": {
+      "label": "Always Compressed Recall Packet",
+      "description": "Always use the compressed recall packet path."
+    },
+    "prior_generic_scheduler": {
+      "label": "Prior Generic Scheduler (from SIM-0)",
+      "description": "Choose best path based on estimated latency only, ignoring workload type."
+    },
+    "librarian_workload_aware": {
+      "label": "Librarian Workload-Aware Optimizer",
+      "description": "Choose context route based on workload type, freshness, provenance, evidence needs, and risk."
+    }
+  },
+
+  "scenarios": {
+    "A_sprint_planning": {
+      "label": "Scenario A — Sprint Planning",
+      "workload_type": "sprint_planning",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 1,
+      "num_turns": 15,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 3,
+      "provenance_checks_enabled": true,
+      "lan_quality": "stable"
+    },
+    "B_sprint_closeout": {
+      "label": "Scenario B — Sprint Closeout",
+      "workload_type": "sprint_closeout",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 1,
+      "num_turns": 25,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 2,
+      "provenance_checks_enabled": true,
+      "lan_quality": "stable"
+    },
+    "C_receipt_generation": {
+      "label": "Scenario C — Receipt Generation",
+      "workload_type": "receipt_generation",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 1,
+      "num_turns": 20,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 2,
+      "provenance_checks_enabled": true,
+      "lan_quality": "stable"
+    },
+    "D_agent_handoff": {
+      "label": "Scenario D — Agent Handoff",
+      "workload_type": "agent_handoff",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 3,
+      "num_turns": 10,
+      "freshness_decay_enabled": false,
+      "provenance_checks_enabled": false,
+      "lan_quality": "stable"
+    },
+    "E_long_session_continuation": {
+      "label": "Scenario E — Long Session Continuation",
+      "workload_type": "long_session_continuation",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 1,
+      "num_turns": 60,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 5,
+      "provenance_checks_enabled": false,
+      "lan_quality": "stable"
+    },
+    "F_runtime_node_qualification": {
+      "label": "Scenario F — Runtime Node Qualification",
+      "workload_type": "runtime_node_qualification",
+      "hardware_profile": "current_windows_runtime_node",
+      "num_sessions": 1,
+      "num_turns": 20,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 2,
+      "provenance_checks_enabled": true,
+      "lan_quality": "stable"
+    },
+    "G_ui_review_design": {
+      "label": "Scenario G — UI Review / Design Planning",
+      "workload_type": "ui_review_or_design_planning",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 1,
+      "num_turns": 20,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 10,
+      "provenance_checks_enabled": false,
+      "lan_quality": "stable"
+    },
+    "H_parallel_mixed": {
+      "label": "Scenario H — Parallel Mixed Workload",
+      "workload_type": "sprint_closeout",
+      "hardware_profile": "current_mac_coordinator",
+      "num_sessions": 5,
+      "num_turns": 25,
+      "freshness_decay_enabled": true,
+      "freshness_ticks_before_decay_start": 2,
+      "provenance_checks_enabled": true,
+      "lan_quality": "stable",
+      "mixed_workloads": [
+        {"workload_type": "sprint_closeout", "session_fraction": 0.2},
+        {"workload_type": "receipt_generation", "session_fraction": 0.2},
+        {"workload_type": "code_patch_preparation", "session_fraction": 0.2},
+        {"workload_type": "agent_handoff", "session_fraction": 0.2},
+        {"workload_type": "long_session_continuation", "session_fraction": 0.2}
+      ]
+    }
+  }
+}

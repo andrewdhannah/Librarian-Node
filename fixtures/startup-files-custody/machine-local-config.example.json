@@ -1,0 +1,32 @@
+{
+  "_meta": {
+    "description": "Example machine-local config overrides for WIN-STARTUP-FILES-CUSTODY-1",
+    "sprint": "WIN-STARTUP-FILES-CUSTODY-0",
+    "status": "planning_only — do not use for active service config yet",
+    "date": "2026-06-28",
+    "contract": "gitignored per config/*.local.json pattern"
+  },
+  "machine": {
+    "hostname": "localhost",
+    "description": "Windows desktop workstation"
+  },
+  "paths": {
+    "repo_root": "G:\\OpenWork\\librarian-runtime-node",
+    "backend_binary": "runtime\\llama.cpp\\llama-server.exe",
+    "model_manager_binary": "G:\\llama.cpp\\build_vs\\bin\\Release\\llama-server-mini.exe",
+    "model_root": "G:\\llama.cpp\\models",
+    "embedding_model_path": "G:\\llamacpp\\snowflake-arctic-embed-m-long-Q4_0.gguf",
+    "temp_dir": "G:\\temp",
+    "sibling_repo_path": "G:\\OpenWork\\TheLibrarian-main"
+  },
+  "port_overrides": {
+    "router": 9130,
+    "embedding": 9125
+  },
+  "env_overrides": {
+    "ROUTER_PORT": "9130",
+    "ROUTER_HOST": "127.0.0.1",
+    "HEALTH_TIMEOUT_SECS": "180",
+    "HEALTH_POLL_INTERVAL_SECS": "5"
+  }
+}

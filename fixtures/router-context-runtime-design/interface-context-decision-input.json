@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Interface sketch for context decision layer input. This is a design artifact, not production code.",
+  "sprint_id": "MAC/WIN-ROUTER-CONTEXT-RUNTIME-DESIGN-1",
+  "status": "advisory — design only",
+  "interfaces": {
+    "context_decision_input": {
+      "description": "Input to the context decision layer",
+      "fields": {
+        "workload_type": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "sprint_planning",
+            "sprint_closeout",
+            "receipt_generation",
+            "validation",
+            "code_patch_preparation",
+            "agent_handoff",
+            "long_session_continuation",
+            "runtime_node_qualification",
+            "ui_review_or_design_planning"
+          ],
+          "description": "Identifies the type of work being performed"
+        },
+        "hardware_profile": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "windows_runtime_node",
+            "mac_coordinator",
+            "weak_lan_runtime_node",
+            "future_stronger_gpu_node"
+          ],
+          "description": "Target hardware platform (must match measured profile)"
+        },
+        "node_health": {
+          "type": "string",
+          "required": false,
+          "enum": ["healthy", "degraded", "stopped", "unknown"],
+          "default": "unknown",
+          "description": "Current runtime node health state (optional, advisory only)"
+        },
+        "governance_overrides": {
+          "type": "object",
+          "required": false,
+          "default": {},
+          "description": "Override governance rules for this decision (not for production use)"
+        }
+      },
+      "examples": [
+        {
+          "workload_type": "sprint_closeout",
+          "hardware_profile": "windows_runtime_node",
+          "node_health": "stopped"
+        },
+        {
+          "workload_type": "receipt_generation",
+          "hardware_profile": "windows_runtime_node",
+          "node_health": "stopped",
+          "governance_overrides": {}
+        }
+      ]
+    }
+  }
+}

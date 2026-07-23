@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Librarian Runtime Dashboard</title>
+  <style>/* {{TOKENS}} */</style>
+  <style>/* {{LIBRARIAN}} */</style>
+</head>
+<body>
+  <div class="lr-shell">
+    <header class="lr-header">
+      <div class="lr-header-title">
+        <svg class="lr-logo" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Librarian Runtime
+      </div>
+      <div class="lr-header-info">
+        <span id="lr-header-meta">Loading...</span> &middot; <span id="lr-header-version">v${VERSION}</span>
+      </div>
+    </header>
+
+    <nav class="lr-tabs">
+      <button class="lr-tab active" data-tab="overview">Overview</button>
+      <button class="lr-tab" data-tab="intelligence">Intelligence</button>
+      <button class="lr-tab" data-tab="operations">Operations</button>
+      <button class="lr-tab" data-tab="governance">Governance</button>
+    </nav>
+
+    <div id="view-overview" class="lr-view active"></div>
+    <div id="view-intelligence" class="lr-view"></div>
+    <div id="view-operations" class="lr-view"></div>
+    <div id="view-governance" class="lr-view"></div>
+  </div>
+
+  <script>/* {{APP_JS}} */</script>
+</body>
+</html>

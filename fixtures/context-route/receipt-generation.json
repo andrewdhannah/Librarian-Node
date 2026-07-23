@@ -1,0 +1,34 @@
+{
+  "route_id": "ctx-route-rg-001",
+  "contract_version": "0.1",
+  "workload_type": "receipt_generation",
+  "selected_context_route": "canonical_evidence_read",
+  "selected_runtime_profile": "mac_coordinator",
+  "freshness_state": "verified_current",
+  "provenance_state": "verified",
+  "governance_outcome": "safe",
+  "estimated_latency_ms": 218.31,
+  "performance_sacrificed_for_evidence": false,
+  "reason_selected": "Receipt generation requires canonical, provenance-verified source evidence. Stale or weak-provenance cache is not acceptable.",
+  "alternatives_rejected": [
+    {
+      "route": "ram_cache",
+      "reason": "RAM cache may have weak provenance; receipt generation requires verified canonical source"
+    },
+    {
+      "route": "compressed_recall_packet",
+      "reason": "Recall packet does not provide canonical evidence for receipt generation"
+    }
+  ],
+  "evidence_requirements": {
+    "requires_current_git_state": true,
+    "requires_current_test_state": true,
+    "requires_canonical_source": true,
+    "allows_stale_context": false
+  },
+  "receipt_summary": {
+    "label": "Canonical evidence selected for receipt generation",
+    "detail": "The context route avoided stale cache and used verified current evidence.",
+    "risk": "low"
+  }
+}
