@@ -1,13 +1,26 @@
 # EPIC-MCP-UPWARD-FACE-1
 
 **Status:** Planning — not yet authorized
+**Prerequisites:** ENTITY-001 ✅, DECISIONS-001 ✅, PERMISSIONS-001 ✅
 **Repository:** Librarian-Node
 
 ---
 
+## Prerequisite State
+
+The governance identity chain is complete before MCP implementation begins:
+
+```
+ENTITY-001     "What exists?"            ✅
+DECISIONS-001  "What was approved?"      ✅
+PERMISSIONS-001 "Who may do what?"       ✅
+```
+
+MCP does not define identity, authority, or permissions. It consumes them.
+
 ## Objective
 
-Implement the Node's upward face — the MCP control plane that exposes governed capabilities to users, agents, and external tools. Every MCP operation flows through governance (custody, evidence, receipt) regardless of the underlying platform adapter.
+Implement the Node's upward face — the MCP control plane that exposes governed capabilities to users, agents, and external tools. Every MCP operation flows through the complete governance chain (entity check → decision history → permission check → capability execution → evidence → receipt) without MCP defining any governance concept itself.
 
 ## Architecture
 
@@ -16,19 +29,44 @@ Agent / User
     │
     │ MCP
     ▼
-Capability Request
+Capability Request Router
     │
-    ├── Identity verification
-    ├── Authorization check
-    ├── Custody claim
-    ├── Capability execution (via platform adapter)
-    ├── Evidence collection
-    ├── Receipt emission
+    ├── Entity Check (ENTITY-001)
+    ├── Decision History (DECISIONS-001)
+    ├── Permission Check (PERMISSIONS-001)
+    ├── Custody Claim
+    ├── Capability Execution (via platform adapter)
+    ├── Evidence Collection
+    ├── Receipt Emission
     └── Response
 ```
 
 MCP is the control plane interface. It does not know which platform adapter
 executes the capability — that is determined by the runtime adapter layer.
+
+The governance chain consumed by MCP:
+
+```
+MCP Request
+    │
+    ▼
+Identity Resolution (who is asking?)
+    │
+    ▼
+Capability Lookup (what is being requested?)
+    │
+    ▼
+Permission Check (is this entity allowed?)
+    │
+    ▼
+Decision Evidence (why was it approved?)
+    │
+    ▼
+Execution Dispatch (via RuntimeAdapter)
+    │
+    ▼
+Evidence + Receipt (what happened?)
+```
 
 ```
                 MCP (control plane)
