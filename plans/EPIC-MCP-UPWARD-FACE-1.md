@@ -174,6 +174,15 @@ MCP
 - Modifying existing governance engines
 - Platform adapter changes
 
+## Architectural Invariants
+
+| Invariant | Meaning | Enforcement |
+|-----------|---------|-------------|
+| Transport independence | Same capability invokable locally, via MCP, or future protocol | Governance logic below protocol boundary |
+| Capability identity | Stable capability IDs owned by substrate, not protocol | CapabilityRegistry contract, not MCP routes |
+| Protocol isolation | MCP types terminate at translation layer | Contract types never contain MCP-specific fields |
+| Uniform receipts | MCP-originated receipts match local execution receipts | Same envelope, invocation_source in payload |
+
 ## Acceptance Gates
 
 | Gate | Description |
@@ -181,10 +190,12 @@ MCP
 | UF-1 | MCP server accepts connections and negotiates protocol |
 | UF-2 | Capability Registry enumerates available capabilities using existing contract types |
 | UF-3 | Identity verification produces evidence using existing types |
-| UF-4 | Authorized actions flow through governance core — custody + evidence + receipt |
+| UF-4 | Authorized actions flow through governance core — entity + decision + permission + evidence + receipt |
 | UF-5 | Unauthorized actions are refused with structured response |
 | UF-6 | All interactions produce receipts using existing receipt envelope |
 | UF-7 | No new governance primitives introduced |
+| UF-8 | Transport invariance: same capability works through MCP and local invocation |
+| UF-9 | Protocol isolation: no contract types depend on MCP |
 
 ## Relationship to Storage Maturity
 
