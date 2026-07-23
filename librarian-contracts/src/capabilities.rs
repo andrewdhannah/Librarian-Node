@@ -51,6 +51,8 @@ pub enum CapabilityCategory {
     HardwareQualification,
     /// Communication with other nodes.
     InterNodeCommunication,
+    /// Information processing (ingestion, indexing, search, knowledge management).
+    InformationProcessing,
 }
 
 /// A capability registry entry — complete set of capabilities for a node.
@@ -138,5 +140,21 @@ mod tests {
         let deserialized: Capability = serde_json::from_str(&json).unwrap();
         assert_eq!(cap.capability_id, deserialized.capability_id);
         assert_eq!(cap.category, deserialized.category);
+    }
+
+    #[test]
+    fn test_information_processing_category() {
+        let cap = Capability {
+            capability_id: "conversation.import".into(),
+            name: "Import Conversations".into(),
+            description: "Import Claude/ChatGPT conversation exports".into(),
+            category: CapabilityCategory::InformationProcessing,
+            requires_authorization: true,
+            enabled: true,
+            schema_version: CAPABILITY_CONTRACT_VERSION.into(),
+        };
+        assert!(matches!(cap.category, CapabilityCategory::InformationProcessing));
+        let json = serde_json::to_string(&cap).unwrap();
+        assert!(json.contains("information_processing"));
     }
 }
