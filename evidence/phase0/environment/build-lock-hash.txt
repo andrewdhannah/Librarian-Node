@@ -1,0 +1,4 @@
+=== Cargo.lock Integrity ===
+Algorithm: SHA-256
+Hash: 71ce638937fd0feb5ff4d7e00d531d2ff10e7b7c485ad14477aa03c4cbf0cf1a
+Source: Librarian-Node/Cargo.lock

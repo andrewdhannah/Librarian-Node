@@ -1,0 +1,8 @@
+=== Target Configuration ===
+target_arch: x86_64
+target_vendor: apple
+target_os: macos
+target_env: (none)
+target_endian: little
+target_pointer_width: 64
+unix: true

@@ -1,0 +1,18 @@
+=== Serialization Envelope Validation ===
+Type: SerializationEnvelope<NodeIdentity>
+Schema name field: present ✓
+Version field: present ✓
+Envelope version: present ✓
+Compatibility mode: present ✓
+Timestamp: present ✓
+Payload round-trips correctly: ✓
+
+The SerializationEnvelope wraps any contract type with:
+  - schema name and version
+  - envelope version
+  - compatibility mode
+  - serialization timestamp
+  - payload
+
+Forward compatibility is handled via ForwardCompatible<T> which preserves
+unknown fields through serde(flatten) into a HashMap<String, Value>.

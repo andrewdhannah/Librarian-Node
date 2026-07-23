@@ -1,0 +1,15 @@
+=== Contract Version Constants ===
+Module                  Constant                           Value
+identity                IDENTITY_CONTRACT_VERSION          1.0.0
+lifecycle               LIFECYCLE_CONTRACT_VERSION        1.1.0
+evidence                EVIDENCE_CONTRACT_VERSION          1.0.0
+receipts                RECEIPT_CONTRACT_VERSION          1.0.0
+custody                 CUSTODY_CONTRACT_VERSION          1.0.0
+capabilities            CAPABILITY_CONTRACT_VERSION       1.0.0
+errors                  ERROR_CONTRACT_VERSION            1.0.0
+serialization           SERIALIZATION_CONTRACT_VERSION    1.0.0
+
+All versions resolve. No version drift detected.
+Swift reference contract versions:
+  LIFECYCLE-PLATFORM-CONTRACT: 1.1 (matches lifecycle 1.1.0)
+  ROUTER-HTTP-CONTRACT: 1.0 (no direct Rust equivalent — router not yet in contracts)

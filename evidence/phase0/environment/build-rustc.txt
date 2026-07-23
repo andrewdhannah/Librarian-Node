@@ -1,0 +1,6 @@
+=== Rust Compiler ===
+rustc 1.95.0 (59807616e 2026-04-14)
+Target: x86_64-apple-darwin
+Debug assertions: true
+Panic strategy: unwind
+Pointer width: 64

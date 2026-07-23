@@ -1,0 +1,18 @@
+=== Phase 0: Serialization Determinism Proof ===
+
+[1/4] Canonical JSON Stability
+  PASS: Same data → same JSON (sorted keys)
+
+[2/4] SHA-256 Hash Determinism
+  PASS: Hash stable: 59b2d7ee2194f05b79b1431d9ae87ecd2f83f7f521d9ec63434c153ce31d355e
+
+[3/4] Round-Trip Fidelity
+  PASS: Serialize → deserialize → serialize produces identical output
+
+[4/4] Wire Format Compatibility
+  PASS: All enums serialize to expected wire format
+
+=== Round-trip payload ===
+{"authorized_at":"2026-07-23T00:00:00Z","authorized_by":"phase0-evidence","capability_expansion":null,"migration_code":false,"receipt_id":"round-trip-test","receipt_type":"sprint_authorization","repository":"Librarian-Node","schema_version":"1.0.0","scope":"Serialization proof","work_order_id":"WO-003"}
+
+=== All serialization proofs PASS ===

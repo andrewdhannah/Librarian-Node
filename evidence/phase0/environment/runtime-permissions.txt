@@ -1,0 +1,8 @@
+=== Filesystem Permissions ===
+Key paths:
+  . (workspace root): drwxr-xr-x (755)
+  librarian-contracts/: drwxr-xr-x (755)
+  evidence/phase0/: drwxr-xr-x (755)
+  scripts/: drwxr-xr-x (755)
+All paths owned by user 'andrew' (staff). No unusual permissions detected.
+Build artifacts in target/ are excluded from repo (.gitignore).

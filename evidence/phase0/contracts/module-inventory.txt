@@ -1,0 +1,15 @@
+=== Module Inventory ===
+librarian-contracts/src/
+  lib.rs              — Crate root, module declarations, prelude
+  identity.rs         — NodeRole (7), PlatformId, Architecture, NodeIdentity, IdentityClaim, ProjectProfile
+  lifecycle.rs        — LifecycleState (11), LifecycleCursor, LifecycleTransition, BranchState, GovernanceStage
+  evidence.rs         — ExecutionEvidence, EvidenceRecord, EvidenceWriterConfig, RiskClass, AuthorityDecision
+  receipts.rs         — Receipt, ReceiptReference, SprintAuthorizationReceipt, EquivalenceReceipt, ReceiptSummary
+  custody.rs          — CustodyMode (10), CustodyAction, CustodyAuthorityRole, CustodyEvent, CustodyStatus, CustodyEnvelope
+  capabilities.rs     — Capability, CapabilityRegistry, CapabilityCategory (10)
+  errors.rs           — ContractError (10 variants), ValidationResult, ValidationError
+  serialization.rs    — SchemaId, SerializationEnvelope, ForwardCompatible, to_canonical_json, hash_canonical
+
+Total modules: 8
+Total public types: 41
+All modules present and compiling. No missing exports.

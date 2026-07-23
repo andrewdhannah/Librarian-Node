@@ -1,0 +1,7 @@
+=== Disk ===
+Filesystem: /dev/disk1s4s1
+Size: 238 GiB
+Used: 10 GiB
+Available: 39 GiB
+Capacity: 22%
+Mount: /

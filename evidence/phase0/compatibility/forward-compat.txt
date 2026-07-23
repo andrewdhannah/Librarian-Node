@@ -1,0 +1,12 @@
+=== Forward Compatibility ===
+Type: ForwardCompatible<T>
+Method: serde(flatten) on HashMap<String, Value>
+
+Test: Deserialize JSON with unknown field {"value": {"name": "test"}, "unknown_field": "preserved"}
+Result: Known field "value" correctly parsed, unknown field "unknown_field" preserved
+Verdict: PASS — forward compatibility works. Old readers can deserialize new data
+without data loss. Unknown fields are retained in the unknown_fields map.
+
+This means if the Swift Core adds a new field to a contract type, the Rust
+contracts crate can still deserialize the message — it just won't know about
+the new field until the crate is updated.

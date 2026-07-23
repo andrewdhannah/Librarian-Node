@@ -1,0 +1,17 @@
+=== Contract Version Resolution ===
+Identity     IDENTITY_CONTRACT_VERSION      1.0.0  ✓
+Lifecycle    LIFECYCLE_CONTRACT_VERSION    1.1.0  ✓
+Evidence     EVIDENCE_CONTRACT_VERSION      1.0.0  ✓
+Receipts     RECEIPT_CONTRACT_VERSION      1.0.0  ✓
+Custody      CUSTODY_CONTRACT_VERSION      1.0.0  ✓
+Capabilities CAPABILITY_CONTRACT_VERSION   1.0.0  ✓
+Errors       ERROR_CONTRACT_VERSION        1.0.0  ✓
+Serialization SERIALIZATION_CONTRACT_VERSION 1.0.0 ✓
+
+Reference platform versions:
+  LIFECYCLE-PLATFORM-CONTRACT.md: v1.1 (matches lifecycle 1.1.0)
+  ROUTER-HTTP-CONTRACT.md: v1.0 (not yet in contracts crate)
+  Swift DecisionResolutionReceipt: schema_version 1.0
+
+All contract versions resolve. No version drift detected.
+Swift reference mapping confirmed in RUST-CONTRACT-MAPPING.md (41 types, 97.6% coverage).

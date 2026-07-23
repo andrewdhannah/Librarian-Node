@@ -1,0 +1,8 @@
+=== OS and Platform ===
+Product: macOS
+Kernel: Darwin 24.6.0
+Version: 24.6.0 (Darwin Kernel)
+Build: root:xnu-11417.140.69.709.8~1/RELEASE_X86_64
+Architecture: x86_64 (Intel)
+Hostname: AndrewsMac.local
+Date collected: 2026-07-23

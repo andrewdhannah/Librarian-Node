@@ -1,0 +1,6 @@
+=== Network Interfaces ===
+lo0: 127.0.0.1 (loopback)
+en0: ether 8c:dc:d4:57:54:34 (inactive)
+en1: 192.168.10.22/24 (active, WiFi)
+utun0: IPv6 tunnel
+utun1: IPv6 tunnel

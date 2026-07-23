@@ -1,0 +1,6 @@
+=== Cargo Check ===
+Command: cargo check -p librarian-contracts
+Result: 0 errors, 0 warnings
+Build profile: dev (unoptimized, debuginfo)
+Duration: 20.91s
+Date: 2026-07-23

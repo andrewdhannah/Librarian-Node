@@ -1,0 +1,7 @@
+=== Round-Trip Fidelity ===
+Type: SprintAuthorizationReceipt (8 fields including optional)
+Process: serialize → deserialize → serialize
+Input JSON length compared to output JSON length: identical
+Field-by-field comparison: identical
+Optional fields: capability_expansion correctly round-trips null
+Verdict: PASS — full round-trip fidelity preserved

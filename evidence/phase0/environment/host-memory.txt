@@ -1,0 +1,8 @@
+=== Memory ===
+Total: 17179869184 bytes (16 GB)
+Page size: 4096 bytes
+Pages free: 15279
+Pages active: 1465304
+Pages inactive: 1462888
+Pages wired: 735670
+Pages occupied by compressor: 512852

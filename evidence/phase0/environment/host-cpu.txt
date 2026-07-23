@@ -1,0 +1,5 @@
+=== CPU ===
+Model: Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz
+Physical cores: 4
+Logical cores: 8
+Features: cmpxchg16b, fxsr, sse, sse2, sse3, sse4.1, ssse3

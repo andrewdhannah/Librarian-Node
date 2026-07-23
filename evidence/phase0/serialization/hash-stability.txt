@@ -1,0 +1,6 @@
+=== SHA-256 Hash Determinism ===
+Method: hash_canonical() on BTreeMap data
+Run 1 hash: 59b2d7ee2194f05b79b1431d9ae87ecd2f83f7f521d9ec63434c153ce31d355e
+Run 2 hash: 59b2d7ee2194f05b79b1431d9ae87ecd2f83f7f521d9ec63434c153ce31d355e
+Hash length: 64 hex characters
+Verdict: PASS — SHA-256 hashes are deterministic across runs

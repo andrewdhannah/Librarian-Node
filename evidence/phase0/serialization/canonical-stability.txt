@@ -1,0 +1,6 @@
+=== Canonical JSON Stability ===
+Method: to_canonical_json() with BTreeMap of 3 keys (a, m, z)
+Key insertion order: z_key, a_key, m_key
+Output order: a_key, m_key, z_key (sorted)
+Result: Two serializations of identical data produce identical output
+Verdict: PASS — canonical JSON is deterministic

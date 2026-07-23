@@ -1,0 +1,16 @@
+=== Cargo Test ===
+Command: cargo test -p librarian-contracts --lib
+Result: 28 passed, 0 failed, 0 ignored
+Test profile: test
+Duration: 6.11s (compilation) + 0.00s (execution)
+
+Breakdown by module:
+  identity:    6 tests  (node_role, platform, identity_serde, claim_default, platform_all, node_role_all)
+  lifecycle:   5 tests  (valid_transitions, suspended_not_terminal, branch_state, cursor_serde, all_labels)
+  evidence:    2 tests  (execution_evidence_serde, evidence_record_payload)
+  receipts:    3 tests  (receipt_serde, sprint_authorization, equivalence_receipt)
+  custody:     4 tests  (mode_allows_mutation, event_serde, envelope, mode_all)
+  capabilities:2 tests  (registry, serde)
+  errors:      4 tests  (display, result_type, retryable, validation)
+  serialization:4 tests (envelope, canonical_json, hash, forward_compat)
+Total:        28 tests

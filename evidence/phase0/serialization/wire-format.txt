@@ -1,0 +1,14 @@
+=== Wire Format Compatibility ===
+Enum types serialized:
+
+  CustodyMode::OwnerHeld      → "OWNER_HELD"       (SCREAMING_SNAKE_CASE)
+  NodeRole::LibrarianAuthority → "librarian_authority" (snake_case)
+  LifecycleState::Operational  → "operational"      (snake_case)
+
+Swift compatibility:
+  Swift uses CodingKeys to map camelCase → snake_case for JSON
+  Rust uses serde(rename_all = "snake_case") which produces snake_case directly
+  Result: Both produce the same wire format for interchange fields
+  SCREAMING_SNAKE_CASE enums (CustodyMode) match Swift raw values exactly
+
+Verdict: PASS — wire format compatible with Swift reference

@@ -1,0 +1,39 @@
+=== Dependency Tree (depth 1) ===
+
+librarian-contracts v0.1.0
+  ├── anyhow v1.0.103
+  ├── chrono v0.4.45
+  ├── reqwest v0.12.28
+  ├── serde v1.0.228
+  ├── serde_json v1.0.150
+  ├── sha2 v0.10.9
+  └── uuid v1.23.5
+
+librarian-core v0.1.0
+  ├── anyhow v1.0.103
+  ├── chrono v0.4.45
+  ├── librarian-contracts v0.1.0 (local)
+  ├── reqwest v0.12.28
+  ├── rusqlite v0.31.0
+  ├── serde v1.0.228
+  ├── serde_json v1.0.150
+  ├── sha2 v0.10.9
+  └── uuid v1.23.5
+
+librarian-node v0.1.0
+  ├── anyhow v1.0.103
+  ├── axum v0.8.9
+  ├── chrono v0.4.45
+  ├── clap v4.6.2
+  ├── librarian-contracts v0.1.0 (local)
+  ├── reqwest v0.12.28
+  ├── rusqlite v0.31.0
+  ├── serde v1.0.228
+  ├── serde_json v1.0.150
+  ├── sha2 v0.10.9
+  ├── tokio v1.52.3
+  ├── tower v0.5.3
+  ├── tower-http v0.6.11
+  ├── tracing v0.1.44
+  ├── tracing-subscriber v0.3.23
+  └── uuid v1.23.5
