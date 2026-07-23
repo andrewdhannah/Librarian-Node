@@ -3,6 +3,7 @@ pub mod capability_evidence;
 pub mod comparative;
 pub mod connection;
 pub mod db;
+pub mod governance;
 pub mod lifecycle;
 pub mod ledger;
 pub mod migrations;
