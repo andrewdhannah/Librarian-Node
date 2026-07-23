@@ -9,6 +9,7 @@ use super::framework::Migration;
 pub fn all_migrations() -> Vec<Migration> {
     vec![
         migration_001_initial_governance(),
+        migration_002_entity_registry(),
     ]
 }
 
@@ -86,15 +87,58 @@ pub fn migration_001_initial_governance() -> Migration {
     }
 }
 
+/// Migration 002: Entity registry.
+///
+/// Creates the entities table for persistent actor, node, capability,
+/// and resource tracking. This is the first step toward multi-actor
+/// governance — it establishes what exists without defining authority.
+pub fn migration_002_entity_registry() -> Migration {
+    Migration {
+        id: 2,
+        description: "Create entity registry (actors, nodes, capabilities, resources)",
+        up_sql: indoc::indoc! {"
+            CREATE TABLE IF NOT EXISTS entities (
+                entity_id TEXT PRIMARY KEY,
+                entity_type TEXT NOT NULL CHECK (entity_type IN (
+                    'human', 'agent', 'node', 'capability', 'resource', 'organization'
+                )),
+                display_name TEXT NOT NULL,
+                external_id TEXT,
+                parent_entity_id TEXT REFERENCES entities(entity_id),
+                status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'retired')),
+                metadata TEXT DEFAULT '{}',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                registered_by TEXT NOT NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type);
+            CREATE INDEX IF NOT EXISTS idx_entities_parent ON entities(parent_entity_id);
+        "},
+        down_sql: Some(indoc::indoc! {"
+            DROP INDEX IF EXISTS idx_entities_parent;
+            DROP INDEX IF EXISTS idx_entities_type;
+            DROP TABLE IF EXISTS entities;
+        "}),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_migration_has_description() {
+    fn test_migration_001_has_description() {
         let m = migration_001_initial_governance();
         assert!(!m.description.is_empty());
         assert_eq!(m.id, 1);
+    }
+
+    #[test]
+    fn test_migration_002_has_description() {
+        let m = migration_002_entity_registry();
+        assert!(!m.description.is_empty());
+        assert_eq!(m.id, 2);
     }
 
     #[test]
@@ -110,5 +154,24 @@ mod tests {
         for m in all_migrations() {
             assert!(!m.up_sql.is_empty(), "Migration {} has no up SQL", m.id);
         }
+    }
+
+    #[test]
+    fn test_migration_002_has_correct_types() {
+        let m = migration_002_entity_registry();
+        assert!(m.up_sql.contains("'human'"));
+        assert!(m.up_sql.contains("'agent'"));
+        assert!(m.up_sql.contains("'node'"));
+        assert!(m.up_sql.contains("'capability'"));
+        assert!(m.up_sql.contains("'resource'"));
+        assert!(m.up_sql.contains("'organization'"));
+    }
+
+    #[test]
+    fn test_migration_002_has_status_checks() {
+        let m = migration_002_entity_registry();
+        assert!(m.up_sql.contains("'active'"));
+        assert!(m.up_sql.contains("'suspended'"));
+        assert!(m.up_sql.contains("'retired'"));
     }
 }

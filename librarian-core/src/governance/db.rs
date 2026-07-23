@@ -44,7 +44,7 @@ impl GovernanceDb {
     }
 
     /// Get a new connection with standard PRAGMAs.
-    fn connection(&self) -> Result<Connection> {
+    pub fn connection(&self) -> Result<Connection> {
         let conn = Connection::open(&self.path)
             .with_context(|| format!("Failed to open governance database at {:?}", self.path))?;
         conn.execute_batch(
