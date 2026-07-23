@@ -112,6 +112,60 @@ The add-on wraps this in governance and adds:
     TheLibrarian-MOC.md
 ```
 
+## Provider Sandbox Model
+
+Each provider owns an isolated directory that it cannot escape without authorization.
+
+```
+data/providers/claude-ingestion/
+├── data.db                    ← structured data (conversations, entities)
+├── conversations/             ← ingested source artifacts
+├── artifacts/                 ← derived artifacts (summaries, extractions)
+├── indexes/                   ← search indexes
+└── migrations/                ← schema versions
+```
+
+The provider receives a `StorageClient` handle, not a raw filesystem path.
+The runtime enforces the sandbox boundary — no provider can access another
+provider's directory or the substrate's `governance.db` without explicit
+permission routing through the capability layer.
+
+### Storage Ownership Model
+
+| Layer | Owner | Purpose |
+|-------|-------|---------|
+| Raw sources | External | Original Claude/ChatGPT exports, files |
+| Provider sandbox | Capability provider | Parsing, normalization, extraction, provenance |
+| Governance DB | Librarian substrate | Entities, decisions, permissions, receipts, evidence |
+| Obsidian vault | Human projection | Review, editing, navigation, graph exploration |
+| RAG index | Retrieval projection | Semantic search and context selection |
+| Context packages | Controlled output | Minimum information for AI providers |
+
+### Projections Are Disposable
+
+The governed knowledge store is authoritative. Derived views can be regenerated:
+
+```
+Obsidian vault    → rebuild from provider data
+RAG index         → re-embed from provider data
+Context packages  → regenerate on request
+```
+
+But provenance and governance records remain stable.
+
+### Provider Removal
+
+```
+1. Disable provider capability
+2. Record removal decision (governance receipt)
+3. Delete provider sandbox
+4. Preserve governance history
+```
+
+After removal, the substrate can answer "this provider existed and imported
+these artifacts" but cannot recreate deleted content. Audit history and
+content retention are separate concerns.
+
 ## Governance Integration
 
 ```
@@ -123,13 +177,18 @@ Permission check
     ↓
 Custody claim
     ↓
-Parse + Store (private DB)
+Parse + Store (provider sandbox)
+    ├── conversation.db
+    ├── source artifacts (hashed, timestamped)
+    └── extracted entities
     ↓
-Generate Markdown
+Generate Obsidian projection
     ↓
 Record provenance
     ↓
-Emit evidence receipt
+Update RAG index (optional)
+    ↓
+Emit evidence + receipt
     ↓
 Release custody
 ```
