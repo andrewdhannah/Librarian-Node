@@ -1,52 +1,39 @@
-//! librarian-contracts — neutral packet contracts for LibrarianOS Core/Node communication.
+//! # librarian-contracts
 //!
-//! This crate contains the sealed packet types that cross the authority boundary
-//! between Core (canonical authority) and Node (execution runtime).
+//! Neutral packet contracts for Librarian Core/Node communication.
+//! No database, no runtime, no authority logic.
 //!
-//! It contains NO:
-//! - Database logic
-//! - Runtime or process management
-//! - Authority decision making
-//! - HTTP server or endpoint definitions
+//! This crate defines the portable contract layer that every Librarian
+//! platform implementation (Swift, Rust, etc.) implements. Contracts are
+//! serializable, versioned, and platform-neutral.
 //!
-//! Both `librarian-core` and `librarian-node` depend on this crate.
-//! Neither owns it. It is the neutral contract layer.
+//! ## Modules
+//!
+//! - `identity` — Node and platform identity types
+//! - `lifecycle` — Lifecycle states, cursors, and transitions
+//! - `evidence` — Evidence record types
+//! - `receipts` — Governance receipt types
+//! - `custody` — Custody envelopes and operations
+//! - `capabilities` — Capability declarations
+//! - `errors` — Contract-level error types
+//! - `serialization` — Deterministic serialization utilities
 
-pub mod allocation;
-pub mod bootstrap;
-pub mod policy;
-pub mod common;
-pub mod core_integration;
-pub mod evidence_packet;
-pub mod fleet;
-pub mod node;
-pub mod operations;
-pub mod registry;
-pub mod owner_allocation;
-pub mod owner_workflows;
-pub mod qualification_request;
-pub mod residency_status;
-pub mod bridge;
-pub mod capability_evidence;
+pub mod identity;
+pub mod lifecycle;
+pub mod evidence;
+pub mod receipts;
 pub mod custody;
-pub mod evidence_classification;
-pub mod evidence_intelligence;
-pub mod session;
-pub mod workload_lifecycle;
-pub mod workload_session;
-pub mod anomaly_detection;
-pub mod owner_insight;
-pub mod pattern_escalation;
-pub mod recovery_custody;
-pub mod reconciliation;
-pub mod model_runtime;
-pub mod fleet_trust;
-pub mod registry_apply;
-pub mod registry_enforcement;
-pub mod registry_mcp;
-pub mod registry_owner;
+pub mod capabilities;
+pub mod errors;
+pub mod serialization;
 
-pub use common::*;
-pub use evidence_packet::EvidencePacket;
-pub use qualification_request::QualificationRequest;
-pub use residency_status::{ActiveLease, ActiveRun, ResidencyStatusQuery, ResidencyStatusResponse};
+pub mod prelude {
+    pub use crate::identity::*;
+    pub use crate::lifecycle::*;
+    pub use crate::evidence::*;
+    pub use crate::receipts::*;
+    pub use crate::custody::*;
+    pub use crate::capabilities::*;
+    pub use crate::errors::*;
+    pub use crate::serialization::*;
+}
