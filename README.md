@@ -1,132 +1,79 @@
-# Librarian Windows Runtime Node
+# Librarian Node
 
 **Status:** Production — Audit Phase  
-**Architecture:** ADR-PLATFORM-001 (Core / Node Authority Architecture)  
 **Lifecycle:** ADR-PLATFORM-002 (Platform Lifecycle)  
 
 ---
 
 ## Purpose
 
-This repository contains the Windows Runtime Node for The Librarian platform. The Node is an execution authority component — it runs models, generates evidence, and reports to the Librarian Core.
+This repository contains the **shared Rust substrate** for The Librarian platform. It is a cross-platform Rust workspace that provides the portable Node layer — contracts, governance algorithms, and runtime execution — for every platform the Librarian runs on.
 
-The repository is used to:
+| Plane | Crate | Responsibility |
+|-------|-------|---------------|
+| **Contract** | `librarian-contracts` | Identity, lifecycle, evidence, receipts, custody, capabilities, serialization |
+| **Capability** | `librarian-core` | Governance algorithms, qualification, evidence pipeline, registry |
+| **Execution** | `librarian-node` | Services, residency supervisor, operator dashboard |
+| **Observation** | `scripts/`, `fixtures/`, `reports/` | Evidence collection, qualification, diagnostics |
 
-- audit runtime health
-- diagnose MCP failures
-- validate governance integration
-- qualify performance
-- review security
-- populate governance data
-- produce certification evidence
-
-**No architectural changes are performed without Owner authorization.**
-
-## Architecture
-
-The Librarian platform follows a Core / Node authority architecture:
+## Repository Architecture
 
 ```
-Platform
-    ├── Installability · Portability · Configuration · Discovery
-    │
-    ├── Librarian Core
-    │   Canonical Authority
-    │
-    ├── Librarian Node ← YOU ARE HERE
-    │   Execution Authority
-    │
-    ├── MCP Bridge
-    │   Protocol Boundary
-    │
-    └── Shared Contracts
-        Truth · Custody · Receipts · Evidence
+Librarian-Node/
+├── librarian-contracts/     # Portable contract definitions (Rust crate)
+├── librarian-core/          # Portable governance algorithms (Rust crate)
+├── librarian-node/          # Portable node runtime (Rust crate)
+├── platform/                # Platform-specific adapters and evidence
+│   └── windows/             #   NSSM, PowerShell, Windows service integration
+├── scripts/                 # Evidence collection, qualification, operations
+├── fixtures/                # Test fixtures and evidence
+├── config/                  # Runtime configuration
+├── docs/                    # Architecture, operations, sprints
+└── evidence/                # Collected evidence artifacts
 ```
 
-The Node is a governed execution environment. It:
-- Executes models via llama.cpp
-- Manages runtime lifecycle and hardware
-- Generates and records evidence
-- Maintains local operational state
-- Reports to Core
+## Platform Support
 
-The Node does NOT:
-- Create canonical truth
-- Approve capability classification
-- Modify governance rules
-- Seal evidence as canonical
-- Override Core decisions
-- Claim canonical authority
+| Platform | Core | Node | Status |
+|----------|------|------|--------|
+| Windows | Planned | Active | Rust router + PowerShell + NSSM |
+| macOS | Swift (separate repo) | Planned | launchd adapter |
+| Linux | Planned | Planned | systemd adapter (future) |
+
+## Related Repositories
+
+| Repository | Role | Language |
+|-----------|------|----------|
+| [Librarian-Platform-Equivalence](https://github.com/andrewdhannah/Librarian-Platform-Equivalence) | Equivalence validation framework | Docs + JSON schemas |
+| CarbideFrame `active/librarian/` | macOS Core (reference implementation) | Swift |
+| Future: Librarian-macOS | macOS application (extracted from CarbideFrame) | Swift |
+| Future: Librarian-Linux | Linux deployment target | Rust |
 
 ## Current State
 
 | Area | Status |
 |------|--------|
-| Node Identity | ✅ Complete |
-| Capability Registry | ✅ Complete |
-| Custody | ✅ Complete |
-| Runtime Execution | ✅ Complete |
-| Operational Dashboard | ✅ Complete |
-| Registry Governance | ✅ Complete |
-| MCP Contracts | ✅ Complete |
-| Installability & Portability | ❌ Planned |
-| Core Integration | ⏳ Waiting on Core |
-
-## Sprint Roadmap
-
-```
-COMPLETE
--------
-Node Foundation
-Node Operational Maturity
-Node Registry Governance
-Platform Architecture Lock
-
-NEXT
-----
-Node Installability (EPIC-NODE-INSTALLABILITY-AND-PORTABILITY-1)
-
-THEN
-----
-Node ↔ Core Integration
-
-THEN
-----
-Multi-Node Coordination
-
-THEN
-----
-Distributed Platform
-```
-
-## Evidence Policy
-
-This repository follows the Librarian governance process:
-
-**Proposal**
-    ↓
-**Impact Analysis**
-    ↓
-**Invariant Review**
-    ↓
-**Owner Authorization**
-    ↓
-**Implementation**
-    ↓
-**Certification**
-
-Evidence is append-only. State may change; evidence does not.
+| `librarian-contracts` | ✅ Complete (8 domains, 28 tests, 41 types mapped to Swift) |
+| `librarian-core` | ⏳ Scaffolded (contracts ready, algorithms pending) |
+| `librarian-node` | ⏳ Scaffolded (contracts ready, runtime pending) |
+| Platform: Windows | ✅ Router, qualification, service integration (pre-existing) |
+| Platform: Linux | ❌ Not yet |
+| Phase 0 Evidence | ⏳ Planned (WO-003) |
 
 ## Governance Model
 
-All changes follow the governance documented in `docs/planning/INVARIANT-REVIEW.md` and `docs/planning/IMPACT-ANALYSIS.md`.
+All changes follow the Librarian governance process:
+
+**Proposal → Impact Analysis → Invariant Review → Owner Authorization → Implementation → Certification**
+
+Evidence is append-only. State may change; evidence does not.
 
 ---
 
 ## License
 
-See [LICENSE](LICENSE).
+MIT — See [LICENSE](LICENSE).
 
 ## Security
 
-See [docs/security/SECURITY-BASELINE.md](docs/security/SECURITY-BASELINE.md) for security policies.
+See [docs/security/SECURITY-BASELINE.md](docs/security/SECURITY-BASELINE.md).

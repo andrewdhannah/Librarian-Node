@@ -1,11 +1,11 @@
-# Librarian Runtime Node
+# Librarian Node
 
-**Local model runtime custody node for The Librarian.**
+**Cross-platform Rust substrate for The Librarian platform.**
 
-A governed local runtime node that hosts and supervises model backends for
-The Librarian project. Provides profile selection, backend health monitoring,
-chat proxying, process restart, and structured refusal behavior — all within
-a strict advisory-only authority boundary.
+The shared Rust workspace for The Librarian platform. Contains portable
+contract definitions (librarian-contracts), governance algorithms (librarian-core),
+and runtime execution (librarian-node). Windows platform adapters are included
+as implementation evidence under platform/windows/.
 
 ---
 
