@@ -55,62 +55,51 @@ impl GovernanceDb {
         Ok(conn)
     }
 
-    /// Run migrations to ensure schema is current.
+    /// Run numbered migrations to ensure schema is current.
+    /// Each migration produces evidence and a receipt.
     fn migrate(&self, conn: &Connection) -> Result<()> {
-        conn.execute_batch(
-            "CREATE TABLE IF NOT EXISTS lifecycle_cursors (
-                project_id TEXT PRIMARY KEY,
-                current_state TEXT NOT NULL,
-                cycle INTEGER NOT NULL DEFAULT 1,
-                cursor_position INTEGER NOT NULL DEFAULT 0,
-                last_transition_at TEXT NOT NULL,
-                schema_version TEXT NOT NULL DEFAULT '1.1.0',
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
+        use crate::governance::migrations::framework::MigrationRunner;
+        use crate::governance::migrations::migrations_list;
 
-            CREATE TABLE IF NOT EXISTS custody_events (
-                event_id TEXT PRIMARY KEY,
-                project_id TEXT NOT NULL,
-                node_id TEXT NOT NULL,
-                document_reference TEXT NOT NULL,
-                custody_action TEXT NOT NULL,
-                previous_mode TEXT,
-                resulting_mode TEXT,
-                timestamp TEXT NOT NULL,
-                schema_version TEXT NOT NULL DEFAULT '1.0.0'
-            );
+        let runner = MigrationRunner::new(migrations_list::all_migrations());
 
-            CREATE TABLE IF NOT EXISTS evidence_records (
-                record_id TEXT PRIMARY KEY,
-                category TEXT NOT NULL,
-                description TEXT NOT NULL,
-                payload TEXT NOT NULL,
-                payload_hash TEXT NOT NULL,
-                recorded_at TEXT NOT NULL,
-                produced_by TEXT NOT NULL,
-                schema_version TEXT NOT NULL DEFAULT '1.0.0'
-            );
+        // Simulate evidence IDs for migration tracking
+        // In production, these would come from the evidence generator
+        let now = chrono::Utc::now().to_rfc3339();
+        let evidence_id = format!("mig-schema-{}", now);
+        let receipt_id = format!("mig-receipt-{}", now);
 
-            CREATE TABLE IF NOT EXISTS receipts (
-                receipt_id TEXT PRIMARY KEY,
-                receipt_type TEXT NOT NULL,
-                receipt_version TEXT NOT NULL,
-                action TEXT NOT NULL,
-                initiated_by TEXT NOT NULL,
-                authorized_by TEXT,
-                summary TEXT NOT NULL,
-                recorded_at TEXT NOT NULL,
-                schema_version TEXT NOT NULL DEFAULT '1.0.0'
-            );
+        let applied = runner.run_pending(conn, Some(&evidence_id), Some(&receipt_id))?;
 
-            CREATE TABLE IF NOT EXISTS receipt_parents (
-                receipt_id TEXT NOT NULL,
-                parent_receipt_id TEXT NOT NULL,
-                PRIMARY KEY (receipt_id, parent_receipt_id),
-                FOREIGN KEY (receipt_id) REFERENCES receipts(receipt_id)
-            );"
-        )?;
+        if !applied.is_empty() {
+            // Generate a simulated evidence record for the migration run
+            let payload = serde_json::json!({
+                "migrations_applied": applied.iter().map(|m| {
+                    serde_json::json!({
+                        "id": m.migration_id,
+                        "description": m.description,
+                        "sql_hash": m.sql_hash,
+                        "duration_ms": m.duration_ms,
+                    })
+                }).collect::<Vec<_>>(),
+            });
+
+            // Write migration evidence as a JSON blob to the evidence_records table
+            // This is done via raw SQL to avoid circular dependency
+            conn.execute(
+                "INSERT OR IGNORE INTO evidence_records (record_id, category, description, payload,
+                 payload_hash, recorded_at, produced_by, schema_version)
+                 VALUES (?1, 'contract_validation', ?2, ?3, ?4, ?5, 'migration-runner', '1.0.0')",
+                rusqlite::params![
+                    evidence_id,
+                    format!("Applied {} migrations", applied.len()),
+                    payload.to_string(),
+                    "migration-run-evidence",
+                    now,
+                ],
+            )?;
+        }
+
         Ok(())
     }
 
