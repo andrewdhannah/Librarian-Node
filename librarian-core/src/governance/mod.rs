@@ -19,6 +19,7 @@
 pub mod db;
 pub mod cursor;
 pub mod custody;
+pub mod decisions;
 pub mod entity;
 pub mod evidence;
 pub mod receipts;

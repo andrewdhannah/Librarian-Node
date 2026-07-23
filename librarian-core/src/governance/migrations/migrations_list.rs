@@ -10,6 +10,7 @@ pub fn all_migrations() -> Vec<Migration> {
     vec![
         migration_001_initial_governance(),
         migration_002_entity_registry(),
+        migration_003_decision_records(),
     ]
 }
 
@@ -123,6 +124,52 @@ pub fn migration_002_entity_registry() -> Migration {
     }
 }
 
+/// Migration 003: Decision records.
+///
+/// Creates the decisions table for durable owner authority records.
+/// This is the first migration that stores human authority intent:
+/// what was approved, by whom, and under what context.
+///
+/// Decision records link to:
+/// - Entity (who authorized or was the subject)
+/// - Evidence (what supported the decision)
+/// - Receipts (what recorded the decision)
+pub fn migration_003_decision_records() -> Migration {
+    Migration {
+        id: 3,
+        description: "Create decision records (owner authority, approvals, authorizations)",
+        up_sql: indoc::indoc! {"
+            CREATE TABLE IF NOT EXISTS decisions (
+                decision_id TEXT PRIMARY KEY,
+                decision_type TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending', 'approved', 'rejected', 'deferred', 'superseded')),
+                summary TEXT NOT NULL,
+                rationale TEXT,
+                entity_id TEXT NOT NULL REFERENCES entities(entity_id),
+                target_entity_id TEXT REFERENCES entities(entity_id),
+                evidence_id TEXT,
+                receipt_id TEXT,
+                created_at TEXT NOT NULL,
+                decided_at TEXT,
+                decided_by TEXT,
+                superseded_by TEXT REFERENCES decisions(decision_id),
+                schema_version TEXT NOT NULL DEFAULT '1.0.0'
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_decisions_entity ON decisions(entity_id);
+            CREATE INDEX IF NOT EXISTS idx_decisions_status ON decisions(status);
+            CREATE INDEX IF NOT EXISTS idx_decisions_target ON decisions(target_entity_id);
+        "},
+        down_sql: Some(indoc::indoc! {"
+            DROP INDEX IF EXISTS idx_decisions_target;
+            DROP INDEX IF EXISTS idx_decisions_status;
+            DROP INDEX IF EXISTS idx_decisions_entity;
+            DROP TABLE IF EXISTS decisions;
+        "}),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -173,5 +220,29 @@ mod tests {
         assert!(m.up_sql.contains("'active'"));
         assert!(m.up_sql.contains("'suspended'"));
         assert!(m.up_sql.contains("'retired'"));
+    }
+
+    #[test]
+    fn test_migration_003_has_description() {
+        let m = migration_003_decision_records();
+        assert!(!m.description.is_empty());
+        assert_eq!(m.id, 3);
+    }
+
+    #[test]
+    fn test_migration_003_has_decision_statuses() {
+        let m = migration_003_decision_records();
+        assert!(m.up_sql.contains("'pending'"));
+        assert!(m.up_sql.contains("'approved'"));
+        assert!(m.up_sql.contains("'rejected'"));
+        assert!(m.up_sql.contains("'deferred'"));
+        assert!(m.up_sql.contains("'superseded'"));
+    }
+
+    #[test]
+    fn test_migration_003_has_entity_reference() {
+        let m = migration_003_decision_records();
+        assert!(m.up_sql.contains("entity_id"));
+        assert!(m.up_sql.contains("target_entity_id"));
     }
 }
