@@ -7,7 +7,23 @@
 
 ## Objective
 
-Add persistent entity, actor, and capability ownership tracking to the governance database. This is the missing primitive that enables multi-user identity, capability ownership, permission assignment, and audit attribution.
+Add persistent entity storage to the governance database — referenceable records for actors, nodes, capabilities, and resources that participate in governed execution.
+
+This is the first step from a governed execution engine into a governed multi-actor system.
+
+## Boundary
+
+ENTITY-001 answers only:
+
+> Can governance refer to the things participating in execution?
+
+It does NOT answer:
+
+- What actions may an entity perform? (→ PERMISSIONS-001)
+- What decisions has the owner made? (→ DECISIONS-001)
+- Is this request authorized? (→ MCP layer)
+
+Each question belongs to a later sprint. The separation prevents authorization logic from being coupled to entity registration.
 
 ## Why This Exists
 
@@ -25,17 +41,17 @@ The governance database currently tracks:
 | **Decisions (authorizations)** | **(missing)** | ❌ |
 | **Permissions (capability access)** | **(missing)** | ❌ |
 
-Without entity storage, the governance database knows what happened but not who authorized it, who performed it, or who owns the capability.
+Without entity storage, the governance database knows what happened but not who participated.
 
 ## Scope
 
 | Component | Description |
 |-----------|-------------|
-| Entity table | Durable storage for actors, nodes, capabilities, and resources |
-| Entity type classification | Distinguish human, agent, node, capability, resource |
-| Entity ownership | Track parent-child relationships between entities |
-| Entity lifecycle | Active/suspended/retired states for entities |
-| Entity evidence | Every entity registration/revision produces evidence |
+| Entity table (migration 002) | Durable storage for actors, nodes, capabilities, resources |
+| Entity type classification | Distinguish human, agent, node, capability, resource, organization |
+| Parent-child relationships | Track entity ownership hierarchy |
+| Entity lifecycle status | Active / suspended / retired |
+| Entity evidence | Every registration/revision produces evidence |
 
 ## Non-Scope
 
@@ -45,26 +61,29 @@ New receipt types:              0
 New evidence categories:        0
 New lifecycle states:           0
 New residency states:           0
-Permission enforcement:         0 (next sprint)
-Decision records:               0 (next sprint)
-MCP server:                     0 (future epic)
-Authentication protocol:        0 (future epic)
+Permission enforcement:         0 (→ PERMISSIONS-001)
+Decision records:               0 (→ DECISIONS-001)
+Authentication providers:       0 (future)
+MCP server:                     0 (→ UF-001)
+Organizations/tenants:          0 (beyond parent-child)
+Roles/groups:                   0 (beyond entity types)
 ```
 
 ## Data Model
 
 ```sql
--- Migration NNN: entity_registry
+-- Migration 002: entity_registry
+-- This is additive only. Entities table is independent.
 CREATE TABLE IF NOT EXISTS entities (
     entity_id TEXT PRIMARY KEY,
     entity_type TEXT NOT NULL CHECK (entity_type IN (
         'human', 'agent', 'node', 'capability', 'resource', 'organization'
     )),
     display_name TEXT NOT NULL,
-    external_id TEXT,                           -- identity provider reference
+    external_id TEXT,                           -- reference to external identity
     parent_entity_id TEXT REFERENCES entities(entity_id),
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'retired')),
-    metadata TEXT DEFAULT '{}',                 -- JSON metadata
+    metadata TEXT DEFAULT '{}',                 -- JSON metadata (platform info, etc.)
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     registered_by TEXT NOT NULL
@@ -74,73 +93,57 @@ CREATE INDEX idx_entities_type ON entities(entity_type);
 CREATE INDEX idx_entities_parent ON entities(parent_entity_id);
 ```
 
-## Architecture
+## Contract Integration
 
-The entity registry integrates with existing contracts:
+The entity registry maps existing contract types to storage:
 
 ```
-NodeIdentity (contract type)
-    ↓
-Entity record (storage)
-    └── type = 'node'
-    └── external_id = NodeId
-    └── parent = owning organization
-
-Capability (contract type)
-    ↓
-Entity record (storage)
-    └── type = 'capability'
-    └── external_id = capability_id
-    └── parent = owning node or human
-```
-
-Usage pattern:
-
-```rust
-// Register a node identity in the entity registry
-let entity = EntityRecord {
-    entity_id: "node-windows-1",
-    entity_type: EntityType::Node,
-    display_name: "Windows Runtime Node 1",
-    external_id: Some(node_id.as_str()),
-    parent_entity_id: Some("org-librarian"),
-    status: EntityStatus::Active,
-    metadata: serde_json::json!({"platform": "windows", "version": "0.1.0"}),
-    registered_at: now,
-    registered_by: "migration-runner",
-};
-registry.register_entity(&entity)?;
-
-// Later: associate a capability with that node
-let cap = CapabilityOwnership {
-    capability_id: "model-phi-4",
-    owner_entity_id: "node-windows-1",
-    granted_at: now,
-    granted_by: "owner",
-};
-registry.grant_capability(&cap)?;
+NodeIdentity (contract)  →  Entity (type=node, external_id=NodeId)
+Capability (contract)    →  Entity (type=capability, external_id=capability_id)
+NodeRole (contract)      →  Entity type classification
+CustodyEvent (contract)  →  References entity_id as actor
+EvidenceRecord (contract)→  Produced_by references entity_id
+Receipt (contract)       →  Initiated_by references entity_id
 ```
 
 ## Acceptance Gates
 
-| Gate | Description |
+| Gate | Requirement |
 |------|-------------|
-| ER-1 | Entity table created via numbered migration |
+| ER-1 | Entity table created via numbered migration (002) |
 | ER-2 | Entity types cover human, agent, node, capability, resource, organization |
 | ER-3 | Entity registration produces evidence using existing EvidenceCategory |
 | ER-4 | Entity lifecycle (active/suspended/retired) tracked |
 | ER-5 | Parent-child relationships supported |
-| ER-6 | All existing tests still pass |
+| ER-6 | All existing 73 tests still pass |
 | ER-7 | No new governance concepts introduced |
+
+## What It Enables
+
+```
+ENTITY-001
+   |
+   ├── "Andrew's node"
+   ├── "Windows node"
+   ├── "Linux node"
+   ├── "MCP client"
+   └── "Capability provider"
+
+       ↓
+
+DECISIONS-001          "Owner approved capability X to entity Y"
+PERMISSIONS-001        "Entity A may invoke capability B"
+UF-001                 "Request enters governance with known identity"
+```
 
 ## Dependencies
 
-- STORAGE-001: ✅ Complete — migration framework exists for adding the entity table
+- STORAGE-001: ✅ Complete — migration framework exists for entity table
 
-## Follow-on Sprint
-
-After ENTITY-001, the next natural sprint is DECISIONS-001 (persistent decision records for owner authorizations), then PERMISSIONS-001 (capability-to-entity access mapping).
+## Follow-on Sequence
 
 ```
-ENTITY-001 ──► DECISIONS-001 ──► PERMISSIONS-001 ──► MCP Auth
+ENTITY-001 ──► DECISIONS-001 ──► PERMISSIONS-001 ──► MCP Auth (UF-001)
 ```
+
+Each sprint adds one table via numbered migration, zero new governance concepts, preserves all existing tests.
