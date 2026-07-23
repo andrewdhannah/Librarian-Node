@@ -300,6 +300,50 @@ The existing HTML tool (`claude_archive_drop_site_v2.html`) does the
 conversion work. The add-on wraps it in governance: custody before
 import, evidence after import, provenance tracking, search capability.
 
+## Artifact Ownership
+
+Add-ons that derive new artifacts from source data must preserve the
+distinction between artifact classes:
+
+| Class | Owner | Example |
+|-------|-------|---------|
+| Source artifact | Source/importer | Claude export JSON |
+| Derived artifact | Transformation pipeline | Normalized conversation, Markdown note, extracted entity |
+| Governance artifact | Librarian Core | Evidence record, receipt, provenance |
+
+Each derived artifact should record:
+
+```json
+{
+  "artifact_id": "conv-abc-123",
+  "type": "conversation_note",
+  "source_artifact": "claude_export_xyz",
+  "created_by": "conversation-ingestion",
+  "governance_owner": "librarian"
+}
+```
+
+This prevents ambiguity when multiple add-ons transform the same information.
+
+## Future: Capability Composition
+
+The current model routes individual capability requests. A future extension
+could allow the router to compose capabilities across add-ons:
+
+```
+conversation.import
+        ↓
+knowledge.extract_entities
+        ↓
+compare_against_work_ledger
+        ↓
+generate_review_queue
+```
+
+The router could orchestrate this without any add-on knowing about the others.
+Each capability remains independently governed — the composition is a routing
+concern, not a governance concern.
+
 ## Key Constraint
 
 Governance does not know what an add-on is. It knows entities,
