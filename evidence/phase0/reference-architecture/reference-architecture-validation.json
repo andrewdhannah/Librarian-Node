@@ -1,0 +1,63 @@
+{
+    "checks_performed":  [
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "contract_conformance_across_platforms",
+                                 "details":  {
+                                                 "platforms_checked":  [
+                                                                           "windows",
+                                                                           "linux",
+                                                                           "macos"
+                                                                       ],
+                                                 "platform_conformance":  {
+                                                                              "linux":  "CONFORMANT",
+                                                                              "macos":  "CONFORMANT",
+                                                                              "windows":  "CONFORMANT"
+                                                                          }
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "schema_validation",
+                                 "details":  {
+                                                 "missing_fields":  [
+
+                                                                    ],
+                                                 "schema_path":  "G:\\OpenWork\\librarian-node\\schemas\\startup-receipt.schema.json"
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "documentation_completeness",
+                                 "details":  {
+                                                 "missing_docs":  [
+
+                                                                  ],
+                                                 "required_docs":  [
+                                                                       "NODE-REFERENCE-ARCHITECTURE.md",
+                                                                       "PLATFORM-ADAPTER-BOUNDARY.md",
+                                                                       "THREE-WAY-EQUIVALENCE-PROTOCOL.md"
+                                                                   ],
+                                                 "existing_docs":  [
+                                                                       "NODE-REFERENCE-ARCHITECTURE.md",
+                                                                       "PLATFORM-ADAPTER-BOUNDARY.md",
+                                                                       "THREE-WAY-EQUIVALENCE-PROTOCOL.md"
+                                                                   ],
+                                                 "docs_path":  "G:\\OpenWork\\librarian-node\\docs"
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "three_way_equivalence_validation",
+                                 "details":  {
+                                                 "macos_receipt":  "G:\\OpenWork\\evidence\\reference-architecture\\macos-startup-receipt-20260724-223400.json",
+                                                 "linux_receipt":  "G:\\OpenWork\\evidence\\reference-architecture\\linux-startup-receipt-20260724-223400.json",
+                                                 "windows_receipt":  "G:\\OpenWork\\evidence\\reference-architecture\\startup-receipt-20260724-223333.json"
+                                             }
+                             }
+                         ],
+    "work_order":  "NODE-REFERENCE-CONTRACT-1",
+    "timestamp":  "2026-07-25T02:36:12.0000000Z",
+    "overall_status":  "PASSED",
+    "report_id":  "RAC-20260724-223612"
+}

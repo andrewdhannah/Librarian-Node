@@ -1,0 +1,136 @@
+{
+    "timestamp":  "2026-07-25T02:36:13.0000000Z",
+    "report_id":  "EQUIVALENCE-20260724-223613",
+    "divergences_detected":  [
+
+                             ],
+    "checks_performed":  [
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "startup_sequence_equivalence",
+                                 "details":  {
+                                                 "macos_phases_passed":  6,
+                                                 "windows_phases_passed":  6,
+                                                 "linux_phases_passed":  6
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "receipt_deterministic_field_equivalence",
+                                 "details":  {
+                                                 "checks_passed":  {
+                                                                       "linux":  6,
+                                                                       "equivalent":  true,
+                                                                       "macos":  6,
+                                                                       "windows":  6
+                                                                   },
+                                                 "governance_commit":  {
+                                                                           "linux":  "6be76216a8048492526c4ca0ae751b6d2d507185",
+                                                                           "equivalent":  true,
+                                                                           "macos":  "6be76216a8048492526c4ca0ae751b6d2d507185",
+                                                                           "windows":  "6be76216a8048492526c4ca0ae751b6d2d507185"
+                                                                       },
+                                                 "checks_failed":  {
+                                                                       "linux":  0,
+                                                                       "equivalent":  true,
+                                                                       "macos":  0,
+                                                                       "windows":  0
+                                                                   },
+                                                 "governance_verified":  {
+                                                                             "linux":  true,
+                                                                             "equivalent":  true,
+                                                                             "macos":  true,
+                                                                             "windows":  true
+                                                                         },
+                                                 "status":  {
+                                                                "linux":  "GOVERNED_EXECUTION",
+                                                                "equivalent":  true,
+                                                                "macos":  "GOVERNED_EXECUTION",
+                                                                "windows":  "GOVERNED_EXECUTION"
+                                                            },
+                                                 "capabilities_loaded":  {
+                                                                             "linux":  true,
+                                                                             "equivalent":  true,
+                                                                             "macos":  true,
+                                                                             "windows":  true
+                                                                         },
+                                                 "environment_validated":  {
+                                                                               "linux":  true,
+                                                                               "equivalent":  true,
+                                                                               "macos":  true,
+                                                                               "windows":  true
+                                                                           },
+                                                 "identity_loaded":  {
+                                                                         "linux":  true,
+                                                                         "equivalent":  true,
+                                                                         "macos":  true,
+                                                                         "windows":  true
+                                                                     }
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "governance_decision_equivalence",
+                                 "details":  {
+                                                 "capabilities_present":  {
+                                                                              "linux":  true,
+                                                                              "equivalent":  true,
+                                                                              "macos":  true,
+                                                                              "windows":  true
+                                                                          },
+                                                 "enter_governed_mode":  {
+                                                                             "linux":  true,
+                                                                             "equivalent":  true,
+                                                                             "macos":  true,
+                                                                             "windows":  true
+                                                                         },
+                                                 "governance_verified":  {
+                                                                             "linux":  true,
+                                                                             "equivalent":  true,
+                                                                             "macos":  true,
+                                                                             "windows":  true
+                                                                         },
+                                                 "identity_valid":  {
+                                                                        "linux":  true,
+                                                                        "equivalent":  true,
+                                                                        "macos":  true,
+                                                                        "windows":  true
+                                                                    },
+                                                 "environment_valid":  {
+                                                                           "linux":  true,
+                                                                           "equivalent":  true,
+                                                                           "macos":  true,
+                                                                           "windows":  true
+                                                                       }
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "capability_declaration_equivalence",
+                                 "details":  {
+                                                 "governance_read":  {
+                                                                         "linux":  true,
+                                                                         "equivalent":  true,
+                                                                         "macos":  true,
+                                                                         "windows":  true
+                                                                     }
+                                             }
+                             },
+                             {
+                                 "status":  "passed",
+                                 "check_name":  "divergence_detection",
+                                 "details":  {
+                                                 "divergences_detected":  [
+
+                                                                          ],
+                                                 "divergence_count":  0
+                                             }
+                             }
+                         ],
+    "platforms_tested":  [
+                             "windows",
+                             "linux",
+                             "macos"
+                         ],
+    "overall_status":  "EQUIVALENT"
+}

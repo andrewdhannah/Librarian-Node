@@ -23,9 +23,14 @@ Librarian-Node/
 ├── librarian-contracts/     # Portable contract definitions (Rust crate)
 ├── librarian-core/          # Portable governance algorithms (Rust crate)
 ├── librarian-node/          # Portable node runtime (Rust crate)
+├── contracts/               # Shared startup contracts (platform-neutral specs)
+│   └── startup/             #   STARTUP-PROTOCOL, STARTUP-OUTPUT-CONTRACT, SESSION-IDENTITY-CONTRACT
 ├── platform/                # Platform-specific adapters and evidence
-│   └── windows/             #   NSSM, PowerShell, Windows service integration
-├── scripts/                 # Evidence collection, qualification, operations
+│   ├── windows/             #   NSSM, PowerShell, Windows service + startup adapter
+│   ├── linux/               #   Bash startup adapter (reference)
+│   └── macos/               #   Swift startup adapter (reference)
+├── schemas/                 # Platform-neutral JSON schemas
+├── scripts/                 # Evidence collection, qualification, operations, validation
 ├── fixtures/                # Test fixtures and evidence
 ├── config/                  # Runtime configuration
 ├── docs/                    # Architecture, operations, sprints
@@ -36,9 +41,9 @@ Librarian-Node/
 
 | Platform | Core | Node | Status |
 |----------|------|------|--------|
-| Windows | Planned | Active | Rust router + PowerShell + NSSM |
-| macOS | Swift (separate repo) | Planned | launchd adapter |
-| Linux | Planned | Planned | systemd adapter (future) |
+| Windows | Planned | Active | Rust router + PowerShell + NSSM + startup adapter |
+| macOS | Swift (separate repo) | Reference | launchd adapter + Swift startup adapter |
+| Linux | Planned | Reference | systemd adapter + Bash startup adapter |
 
 ## Related Repositories
 
@@ -56,11 +61,38 @@ Librarian-Node/
 | `librarian-contracts` | ✅ Complete (8 domains, 28 tests, 41 types mapped to Swift) |
 | `librarian-core` | ⏳ Scaffolded (contracts ready, algorithms pending) |
 | `librarian-node` | ⏳ Scaffolded (contracts ready, runtime pending) |
-| Platform: Windows | ✅ Router, qualification, service integration (pre-existing) |
-| Platform: Linux | ❌ Not yet |
-| Phase 0 Evidence | ⏳ Planned (WO-003) |
+| Platform: Windows | ✅ Router, qualification, service integration, startup adapter |
+| Platform: Linux | ✅ Reference startup adapter |
+| Platform: macOS | ✅ Reference startup adapter |
+| Startup Contracts | ✅ STARTUP-PROTOCOL, STARTUP-OUTPUT-CONTRACT, SESSION-IDENTITY-CONTRACT |
+| Reference Architecture | ✅ NODE-REFERENCE-ARCHITECTURE, adapter boundary, three-way equivalence |
+| Three-Way Equivalence | ✅ Proven: same governance input → same governance outcome on all three platforms |
 
 ## Governance Model
+
+## Reference Architecture
+
+The repository defines a canonical node specification that all platform implementations must satisfy:
+
+```
+              Librarian-Node Canonical Guidance
+                         |
+        +----------------+----------------+
+        |                |                |
+        ▼                ▼                ▼
+     macOS Node      Windows Node     Linux Node
+```
+
+**Key documents:**
+- [`contracts/startup/STARTUP-PROTOCOL.md`](contracts/startup/STARTUP-PROTOCOL.md) — 6-phase startup sequence
+- [`contracts/startup/STARTUP-OUTPUT-CONTRACT.md`](contracts/startup/STARTUP-OUTPUT-CONTRACT.md) — Startup receipt format
+- [`contracts/startup/SESSION-IDENTITY-CONTRACT.md`](contracts/startup/SESSION-IDENTITY-CONTRACT.md) — Node identity requirements
+- [`schemas/startup-receipt.schema.json`](schemas/startup-receipt.schema.json) — Platform-neutral startup receipt schema
+- [`docs/architecture/NODE-REFERENCE-ARCHITECTURE.md`](docs/architecture/NODE-REFERENCE-ARCHITECTURE.md) — Architecture overview
+- [`docs/architecture/PLATFORM-ADAPTER-BOUNDARY.md`](docs/architecture/PLATFORM-ADAPTER-BOUNDARY.md) — Contract/adapter boundary
+- [`docs/architecture/THREE-WAY-EQUIVALENCE-PROTOCOL.md`](docs/architecture/THREE-WAY-EQUIVALENCE-PROTOCOL.md) — Cross-platform equivalence proof
+
+**Equivalence proven:** Same governance input produces same governance outcome across Windows, Linux, and macOS. See [`evidence/phase0/reference-architecture/`](evidence/phase0/reference-architecture/).
 
 All changes follow the Librarian governance process:
 
