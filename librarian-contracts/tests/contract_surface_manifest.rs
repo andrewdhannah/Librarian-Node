@@ -521,6 +521,50 @@ fn m1a_serialized_surface_has_no_authority_keys() {
 }
 
 #[test]
+fn m1b_read_boundary_declared_in_manifest() {
+    // M1-B-0 lock: the runtime registry projection adapter is declared under the
+    // EXISTING REGISTRY-OBSERVATION-SCHEMA-001 suite (parent-aligned lineage,
+    // no new semantic suite). Its source hash is pinned; removing or renaming
+    // it fails the guard.
+    let manifest = load_manifest();
+
+    let declared: BTreeSet<String> = manifest["contracts"]
+        .as_array()
+        .expect("contracts array")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+    assert!(
+        declared.contains("contracts/runtime-api/RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001.md"),
+        "M1-B read boundary contract must be declared in the manifest"
+    );
+
+    let suites: BTreeSet<String> = manifest["schema_suite"]
+        .as_array()
+        .expect("schema_suite array")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+    assert!(
+        suites.contains("REGISTRY-OBSERVATION-SCHEMA-001"),
+        "M1-B contract must share the parent suite REGISTRY-OBSERVATION-SCHEMA-001 (no new suite)"
+    );
+
+    assert!(
+        !suites.contains("RUNTIME-REGISTRY-OBSERVATION-SCHEMA-001"),
+        "M1-B must not introduce a competing registry observation suite"
+    );
+
+    assert!(
+        manifest["source_hashes"]
+            .as_object()
+            .expect("source_hashes")
+            .contains_key("contracts/runtime-api/RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001.md"),
+        "M1-B contract source hash must be pinned"
+    );
+}
+
+#[test]
 fn fixture_and_source_hashes_match_manifest() {
     let manifest = load_manifest();
 
@@ -543,5 +587,5 @@ fn fixture_and_source_hashes_match_manifest() {
         );
         verified += 1;
     }
-    assert_eq!(verified, 8, "manifest must pin 3 fixtures + 5 sources");
+    assert_eq!(verified, 9, "manifest must pin 3 fixtures + 6 sources");
 }
