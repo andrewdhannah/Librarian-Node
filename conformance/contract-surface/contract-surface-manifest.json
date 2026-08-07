@@ -2,8 +2,8 @@
   "manifest_id": "CONTRACT-SURFACE-MANIFEST-001",
   "manifest_version": "1.0.0",
   "created": "2026-08-06T22:24:54Z",
-  "last_rebaseline": "2026-08-06 (M1-0 contract surface lock: capability contract set added; no Rust types added yet — types enter the manifest with the M1 implementation)",
-  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState) and M1-0 (capability contract set). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
+  "last_rebaseline": "2026-08-07 (M1-A implementation types: capability registry type surface added to manifest — 15 enums, 2 newtypes, 8 structs; suites unchanged)",
+  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState), M1-0 (capability contract set), and M1-A (capability registry implementation types). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
   "source": {
     "repository": "github.com/andrewdhannah/Librarian-Node",
     "librarian_contracts_head": "f5959d310e010d7e9e7f97aad1f38ac369109086",
@@ -106,6 +106,244 @@
       "strategy": "rename_all = SCREAMING_SNAKE_CASE",
       "variants": ["INITIALIZING", "STARTUP_COMPLETE", "SERVABLE_RUNTIME", "STARTUP_FAILED"],
       "note": "observational contract representation derived from runtime state (RUNTIME-API-CONTRACT-001 §2.4); does NOT authorize transitions — lifecycle transitions remain owned by the startup/runtime state machine; added to the surface via M0B re-baseline (RUNTIME-API-SCHEMA-001)"
+    },
+    "CapabilityId": {
+      "kind": "newtype",
+      "serialized": true,
+      "strategy": "serde(transparent) over String",
+      "constraint": "schema pattern ^[A-Za-z0-9_-]+$; non-empty (validated by CapabilityId::new)",
+      "note": "identity key (CAPABILITY-IDENTITY-SCHEMA-001); immutable once registered"
+    },
+    "CapabilityVersion": {
+      "kind": "newtype",
+      "serialized": true,
+      "strategy": "serde(transparent) over u32",
+      "constraint": "> 0 (schema CHECK (version > 0), CR-I-001 append-only)",
+      "note": "version number; version 0 is invalid"
+    },
+    "CapabilityType": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["skill", "workflow", "policy", "validator", "template"],
+      "note": "capabilities.type default skill (CAPABILITY-IDENTITY-SCHEMA-001)"
+    },
+    "CapabilityRelationshipType": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["requires", "extends", "refines", "conflicts"],
+      "note": "capability_dependencies.relationship_type default requires"
+    },
+    "CapabilityDependency": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["capability_id", "dependency_id", "required", "relationship_type"],
+      "fields": {
+        "capability_id": { "serde_name": "capability_id", "type": "CapabilityId" },
+        "dependency_id": { "serde_name": "dependency_id", "type": "CapabilityId" },
+        "required": { "serde_name": "required", "type": "bool" },
+        "relationship_type": { "serde_name": "relationship_type", "type": "CapabilityRelationshipType" }
+      },
+      "note": "dependencies are references, not embedded objects (CR-I-005 cycle rejection); self-dependency rejected at construction"
+    },
+    "CapabilityIdentity": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["capability_id", "name", "capability_type", "version", "lifecycle_state"],
+      "fields": {
+        "capability_id": { "serde_name": "capability_id", "type": "CapabilityId" },
+        "name": { "serde_name": "name", "type": "String" },
+        "capability_type": { "serde_name": "capability_type", "type": "CapabilityType" },
+        "version": { "serde_name": "version", "type": "CapabilityVersion|null", "constraint": "active version pointer (NULL valid); versions themselves append-only" },
+        "lifecycle_state": { "serde_name": "lifecycle_state", "type": "QualificationState" }
+      },
+      "note": "identity + lifecycle state ONLY — no qualification fields, no permission fields (CAPABILITY-IDENTITY-CONTRACT-001 §1.2 invariant)"
+    },
+    "QualificationState": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["unreviewed", "reviewed", "qualified", "deprecated", "revoked"],
+      "note": "governance lifecycle axis (capabilities.status); observational — represents states a transition moved between, does not execute transitions"
+    },
+    "QualificationAxis": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["not_tested", "qualifying", "passed", "failed", "stale", "suspended"],
+      "note": "capabilities.qualification axis, independent of governance lifecycle (CAPABILITY-ASSURANCE-CONTRACT-001 §1.3)"
+    },
+    "QualificationRecordStatus": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["qualifying", "passed", "failed", "stale", "superseded"],
+      "note": "capability_qualifications.qualification_status value set"
+    },
+    "AssessorType": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["manual", "automated", "external"],
+      "note": "capability_qualifications.assessor_type"
+    },
+    "QualificationRecord": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["qualification_id", "capability_id", "profile_id", "version_id", "status", "confidence", "evidence_reference", "qualified_at", "expires_at", "assessed_at", "assessor_identity", "assessor_type"],
+      "fields": {
+        "qualification_id": { "serde_name": "qualification_id", "type": "String", "constraint": "Q-YYYYMMDD-NNN" },
+        "capability_id": { "serde_name": "capability_id", "type": "CapabilityId" },
+        "profile_id": { "serde_name": "profile_id", "type": "String" },
+        "version_id": { "serde_name": "version_id", "type": "u32|null" },
+        "status": { "serde_name": "status", "type": "QualificationRecordStatus" },
+        "confidence": { "serde_name": "confidence", "type": "f32|null", "constraint": "0.0–1.0" },
+        "evidence_reference": { "serde_name": "evidence_reference", "type": "String|null", "constraint": "EV-XXXXX" },
+        "qualified_at": { "serde_name": "qualified_at", "type": "String|null", "constraint": "ISO 8601" },
+        "expires_at": { "serde_name": "expires_at", "type": "String|null", "constraint": "ISO 8601; NULL = no expiry" },
+        "assessed_at": { "serde_name": "assessed_at", "type": "String", "constraint": "ISO 8601" },
+        "assessor_identity": { "serde_name": "assessor_identity", "type": "String|null" },
+        "assessor_type": { "serde_name": "assessor_type", "type": "AssessorType" }
+      },
+      "note": "evidence is a REFERENCE, never inline (QUALIFICATION-STATE-CONTRACT-001 §2.2)"
+    },
+    "TransitionType": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["automatic", "manual"]
+    },
+    "TransitionerRole": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["system", "evaluator", "approver", "owner"],
+      "note": "qualification_lifecycle_events.transitioner_role (frozen S-level)"
+    },
+    "QualificationLifecycleEvent": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["event_id", "qualification_id", "capability_id", "from_state", "to_state", "transition_type", "security_classification", "transitioned_by", "transitioner_role", "authority_evidence_id", "evidence_snapshot", "created_at"],
+      "fields": {
+        "event_id": { "serde_name": "event_id", "type": "String", "constraint": "QLE-YYYYMMDD-NNN" },
+        "qualification_id": { "serde_name": "qualification_id", "type": "String" },
+        "capability_id": { "serde_name": "capability_id", "type": "CapabilityId" },
+        "from_state": { "serde_name": "from_state", "type": "QualificationState" },
+        "to_state": { "serde_name": "to_state", "type": "QualificationState" },
+        "transition_type": { "serde_name": "transition_type", "type": "TransitionType" },
+        "security_classification": { "serde_name": "security_classification", "type": "SecurityClassification|null", "constraint": "FROZEN at transition time; audit replay reads this, not current registry state" },
+        "transitioned_by": { "serde_name": "transitioned_by", "type": "String" },
+        "transitioner_role": { "serde_name": "transitioner_role", "type": "TransitionerRole" },
+        "authority_evidence_id": { "serde_name": "authority_evidence_id", "type": "String|null", "constraint": "EV-XXXXX for manual transitions" },
+        "evidence_snapshot": { "serde_name": "evidence_snapshot", "type": "json" },
+        "created_at": { "serde_name": "created_at", "type": "String", "constraint": "ISO 8601" }
+      },
+      "note": "append-only transition RECORD — does not execute transitions (QUALIFICATION-STATE-CONTRACT-001 §2.3)"
+    },
+    "EvidenceDimension": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["identity", "capability", "security_level", "qualification", "constraints"],
+      "note": "five qualification evidence dimensions (PI-001)"
+    },
+    "EvidenceType": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["test_result", "review_approval", "benchmark", "audit_log", "receipt"]
+    },
+    "EvidenceProducerRole": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["evaluator", "system", "automated_harness", "external"],
+      "note": "default evaluator"
+    },
+    "QualificationEvidenceReference": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["evidence_id", "qualification_id", "dimension", "evidence_type", "evidence_reference", "evidence_body", "evidence_hash", "captured_at", "expires_at", "producer_identity", "producer_role"],
+      "fields": {
+        "evidence_id": { "serde_name": "evidence_id", "type": "String", "constraint": "QER-YYYYMMDD-NNN" },
+        "qualification_id": { "serde_name": "qualification_id", "type": "String" },
+        "dimension": { "serde_name": "dimension", "type": "EvidenceDimension" },
+        "evidence_type": { "serde_name": "evidence_type", "type": "EvidenceType" },
+        "evidence_reference": { "serde_name": "evidence_reference", "type": "String|null", "constraint": "EV-XXXXX or external" },
+        "evidence_body": { "serde_name": "evidence_body", "type": "json|null" },
+        "evidence_hash": { "serde_name": "evidence_hash", "type": "String", "constraint": "SHA-256 of evidence_body; non-empty" },
+        "captured_at": { "serde_name": "captured_at", "type": "String", "constraint": "ISO 8601" },
+        "expires_at": { "serde_name": "expires_at", "type": "String|null", "constraint": "ISO 8601; NULL = no expiry" },
+        "producer_identity": { "serde_name": "producer_identity", "type": "String" },
+        "producer_role": { "serde_name": "producer_role", "type": "EvidenceProducerRole" }
+      },
+      "note": "proof is owned by the Evidence Plane; this carries the reference + provenance"
+    },
+    "SecurityClassification": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "explicit serde rename (S0–S5 preserved case; unclassified lowercase)",
+      "variants": ["S0", "S1", "S2", "S3", "S4", "S5", "unclassified"],
+      "note": "frozen meanings PI-001; S0 default when no classification"
+    },
+    "ClassificationDerivation": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["declared", "derived", "inherited", "policy_constraint"],
+      "note": "how the classification fact was obtained (QUALIFICATION-STATE-CONTRACT-001 §5)"
+    },
+    "CapabilitySecurityContext": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["classification", "source", "derivation", "evidence_reference"],
+      "fields": {
+        "classification": { "serde_name": "classification", "type": "SecurityClassification" },
+        "source": { "serde_name": "source", "type": "String" },
+        "derivation": { "serde_name": "derivation", "type": "ClassificationDerivation" },
+        "evidence_reference": { "serde_name": "evidence_reference", "type": "String|null", "constraint": "EV-XXXXX (PI-004: no self-attestation)" }
+      },
+      "note": "observational boundary ONLY; storage-independent provenance — does not know whether classification came from column/policy/inheritance/derivation (QUALIFICATION-STATE-CONTRACT-001 §5)"
+    },
+    "OperationalModeValue": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["explain_only", "review_assist", "recommend_only", "autonomous_assist"],
+      "note": "derived mode values, degraded → autonomous (OPERATIONAL-MODE-DERIVATION-CONTRACT-001 §3)"
+    },
+    "EvidenceFreshness": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["fresh", "stale", "no_evidence"],
+      "note": "evidence freshness input (view_qualification_resolvability)"
+    },
+    "OperationalModeInputs": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["security_classification", "qualification_axis", "lifecycle_state", "evidence_freshness", "policy_constraints"],
+      "fields": {
+        "security_classification": { "serde_name": "security_classification", "type": "SecurityClassification" },
+        "qualification_axis": { "serde_name": "qualification_axis", "type": "QualificationAxis" },
+        "lifecycle_state": { "serde_name": "lifecycle_state", "type": "QualificationState" },
+        "evidence_freshness": { "serde_name": "evidence_freshness", "type": "EvidenceFreshness" },
+        "policy_constraints": { "serde_name": "policy_constraints", "type": "json|null" }
+      },
+      "note": "facts consumed by the derivation (OPERATIONAL-MODE-DERIVATION-CONTRACT-001 §2)"
+    },
+    "OperationalMode": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["mode", "explanation", "derivation_inputs", "evidence_references"],
+      "fields": {
+        "mode": { "serde_name": "mode", "type": "OperationalModeValue" },
+        "explanation": { "serde_name": "explanation", "type": "String" },
+        "derivation_inputs": { "serde_name": "derivation_inputs", "type": "OperationalModeInputs" },
+        "evidence_references": { "serde_name": "evidence_references", "type": "String[]" }
+      },
+      "note": "projection OUTPUT only — the derivation function lives in the projection layer (M1-D), never on this data type"
     }
   },
   "fixture_hashes": {
@@ -117,6 +355,7 @@
     "librarian-core/assets/schema/capability-registry-schema.sql": "083e914ba95dd9c1094f69ad0812aa6dd419b817ec938fa23b0fe96d07e65c20",
     "librarian-core/assets/schema/capability-registry-schema-phase3.sql": "03e7d17b4481041962b905f56681fbf8a8397113d8cef3a0f8c0f0802128014d",
     "librarian-contracts/src/node/startup.rs": "c139e14e84970470adcd4c506065160a344e59bc75516d69c492485958210b22",
-    "librarian-contracts/src/node/mod.rs": "ff6b34dcb3307ff7d872e78830058c406a8454b7b574f7339696503f18f6df68"
+    "librarian-contracts/src/node/mod.rs": "8cc48a2816754553429fa3002ea7b1b364d4de3453812a8fd33377f85c566378",
+    "librarian-contracts/src/node/capability_registry.rs": "be0e8bc7dc8ea9e67fd8a4909d44cb1116bd50b3edadb1f829e10bc942d64d42"
   }
 }

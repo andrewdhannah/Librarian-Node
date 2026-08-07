@@ -13,6 +13,15 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
+use librarian_contracts::node::capability_registry::{
+    AssessorType, CapabilityDependency, CapabilityId, CapabilityIdentity,
+    CapabilityRelationshipType, CapabilitySecurityContext, CapabilityType, CapabilityVersion,
+    ClassificationDerivation, EvidenceDimension, EvidenceFreshness, EvidenceProducerRole,
+    EvidenceType, OperationalMode, OperationalModeInputs, OperationalModeValue, QualificationAxis,
+    QualificationEvidenceReference, QualificationLifecycleEvent, QualificationRecord,
+    QualificationRecordStatus, QualificationState, SecurityClassification, TransitionType,
+    TransitionerRole,
+};
 use librarian_contracts::node::startup::{
     is_sha256_hex, RuntimeLifecycleState, StartupCheck, StartupPhase, StartupStatus,
 };
@@ -258,6 +267,260 @@ fn m1_contract_surface_declared_in_manifest() {
 }
 
 #[test]
+fn m1a_types_declared_in_manifest() {
+    let manifest = load_manifest();
+    let types = manifest["types"].as_object().expect("types object");
+    for name in [
+        "CapabilityId",
+        "CapabilityVersion",
+        "CapabilityType",
+        "CapabilityRelationshipType",
+        "CapabilityDependency",
+        "CapabilityIdentity",
+        "QualificationState",
+        "QualificationAxis",
+        "QualificationRecordStatus",
+        "AssessorType",
+        "QualificationRecord",
+        "TransitionType",
+        "TransitionerRole",
+        "QualificationLifecycleEvent",
+        "EvidenceDimension",
+        "EvidenceType",
+        "EvidenceProducerRole",
+        "QualificationEvidenceReference",
+        "SecurityClassification",
+        "ClassificationDerivation",
+        "CapabilitySecurityContext",
+        "OperationalModeValue",
+        "EvidenceFreshness",
+        "OperationalModeInputs",
+        "OperationalMode",
+    ] {
+        assert!(types.contains_key(name), "manifest must declare M1-A type {name}");
+    }
+}
+
+/// Collect the serialized variant names of an enum's `ALL` const array.
+fn variant_names<T: Copy>(all: &[T], as_str: fn(T) -> &'static str) -> Vec<&'static str> {
+    all.iter().map(|&v| as_str(v)).collect()
+}
+
+#[test]
+fn m1a_enum_variant_surfaces_match_manifest() {
+    let manifest = load_manifest();
+    let enums: Vec<(&str, Vec<&'static str>)> = vec![
+        ("CapabilityType", variant_names(&CapabilityType::ALL, CapabilityType::as_str)),
+        (
+            "CapabilityRelationshipType",
+            variant_names(&CapabilityRelationshipType::ALL, CapabilityRelationshipType::as_str),
+        ),
+        ("QualificationState", variant_names(&QualificationState::ALL, QualificationState::as_str)),
+        ("QualificationAxis", variant_names(&QualificationAxis::ALL, QualificationAxis::as_str)),
+        (
+            "QualificationRecordStatus",
+            variant_names(&QualificationRecordStatus::ALL, QualificationRecordStatus::as_str),
+        ),
+        ("AssessorType", variant_names(&AssessorType::ALL, AssessorType::as_str)),
+        ("TransitionType", variant_names(&TransitionType::ALL, TransitionType::as_str)),
+        ("TransitionerRole", variant_names(&TransitionerRole::ALL, TransitionerRole::as_str)),
+        ("EvidenceDimension", variant_names(&EvidenceDimension::ALL, EvidenceDimension::as_str)),
+        ("EvidenceType", variant_names(&EvidenceType::ALL, EvidenceType::as_str)),
+        (
+            "EvidenceProducerRole",
+            variant_names(&EvidenceProducerRole::ALL, EvidenceProducerRole::as_str),
+        ),
+        (
+            "SecurityClassification",
+            variant_names(&SecurityClassification::ALL, SecurityClassification::as_str),
+        ),
+        (
+            "ClassificationDerivation",
+            variant_names(&ClassificationDerivation::ALL, ClassificationDerivation::as_str),
+        ),
+        (
+            "OperationalModeValue",
+            variant_names(&OperationalModeValue::ALL, OperationalModeValue::as_str),
+        ),
+        ("EvidenceFreshness", variant_names(&EvidenceFreshness::ALL, EvidenceFreshness::as_str)),
+    ];
+
+    for (type_name, actual) in &enums {
+        let expected: Vec<String> = manifest["types"][type_name]["variants"]
+            .as_array()
+            .expect("variants array")
+            .iter()
+            .map(|v| v.as_str().unwrap().to_string())
+            .collect();
+        assert_eq!(
+            *actual, expected,
+            "{type_name} variants drifted from the manifest"
+        );
+
+        // Every variant must round-trip through serde (serde names == manifest names).
+        for name in &expected {
+            let value: serde_json::Value =
+                serde_json::from_str(&format!("\"{name}\"")).expect("deserialize {type_name}");
+            assert!(value.as_str().is_some(), "{type_name} variant {name} not deserializable");
+        }
+    }
+}
+
+/// Sample M1-A records as serialized JSON, keyed by manifest type name.
+fn m1a_samples() -> Vec<(&'static str, serde_json::Value)> {
+    let id_a = CapabilityId::new("alpha".to_string()).expect("valid id");
+    let id_b = CapabilityId::new("beta".to_string()).expect("valid id");
+    let version = CapabilityVersion::new(1).expect("valid version");
+
+    let dependency = CapabilityDependency::new(
+        id_a.clone(),
+        id_b.clone(),
+        true,
+        CapabilityRelationshipType::Requires,
+    )
+    .expect("non-self dependency");
+
+    let identity = CapabilityIdentity {
+        capability_id: id_a.clone(),
+        name: "Alpha Capability".to_string(),
+        capability_type: CapabilityType::Skill,
+        version: Some(version),
+        lifecycle_state: QualificationState::Unreviewed,
+    };
+
+    let record = QualificationRecord {
+        qualification_id: "Q-20260807-001".to_string(),
+        capability_id: id_a.clone(),
+        profile_id: "PROF-001".to_string(),
+        version_id: Some(1),
+        status: QualificationRecordStatus::Passed,
+        confidence: Some(0.95),
+        evidence_reference: Some("EV-00001".to_string()),
+        qualified_at: Some("2026-08-07T10:00:00Z".to_string()),
+        expires_at: None,
+        assessed_at: "2026-08-07T09:00:00Z".to_string(),
+        assessor_identity: Some("evaluator@librarian".to_string()),
+        assessor_type: AssessorType::Manual,
+    };
+
+    let event = QualificationLifecycleEvent {
+        event_id: "QLE-20260807-001".to_string(),
+        qualification_id: "Q-20260807-001".to_string(),
+        capability_id: id_a.clone(),
+        from_state: QualificationState::Unreviewed,
+        to_state: QualificationState::Reviewed,
+        transition_type: TransitionType::Manual,
+        security_classification: Some(SecurityClassification::S0),
+        transitioned_by: "evaluator@librarian".to_string(),
+        transitioner_role: TransitionerRole::Evaluator,
+        authority_evidence_id: Some("EV-00001".to_string()),
+        evidence_snapshot: serde_json::json!({"dimensions_checked": 3}),
+        created_at: "2026-08-07T09:30:00Z".to_string(),
+    };
+
+    let evidence = QualificationEvidenceReference {
+        evidence_id: "QER-20260807-001".to_string(),
+        qualification_id: "Q-20260807-001".to_string(),
+        dimension: EvidenceDimension::Identity,
+        evidence_type: EvidenceType::Receipt,
+        evidence_reference: Some("EV-00001".to_string()),
+        evidence_body: Some(serde_json::json!({"checksum": "abc"})),
+        evidence_hash: "abcd".to_string(),
+        captured_at: "2026-08-07T08:00:00Z".to_string(),
+        expires_at: None,
+        producer_identity: "evaluator@librarian".to_string(),
+        producer_role: EvidenceProducerRole::Evaluator,
+    };
+
+    let security_context = CapabilitySecurityContext {
+        classification: SecurityClassification::S1,
+        source: "capability_registry.capabilities".to_string(),
+        derivation: ClassificationDerivation::Declared,
+        evidence_reference: Some("EV-00001".to_string()),
+    };
+
+    let inputs = OperationalModeInputs {
+        security_classification: SecurityClassification::S1,
+        qualification_axis: QualificationAxis::Passed,
+        lifecycle_state: QualificationState::Qualified,
+        evidence_freshness: EvidenceFreshness::Fresh,
+        policy_constraints: Some(serde_json::json!({"require_approval": true})),
+    };
+
+    let mode = OperationalMode {
+        mode: OperationalModeValue::RecommendOnly,
+        explanation: "qualified with fresh evidence".to_string(),
+        derivation_inputs: inputs,
+        evidence_references: vec!["EV-00001".to_string()],
+    };
+
+    vec![
+        ("CapabilityDependency", serde_json::to_value(dependency).expect("serialize")),
+        ("CapabilityIdentity", serde_json::to_value(identity).expect("serialize")),
+        ("QualificationRecord", serde_json::to_value(record).expect("serialize")),
+        ("QualificationLifecycleEvent", serde_json::to_value(event).expect("serialize")),
+        ("QualificationEvidenceReference", serde_json::to_value(evidence).expect("serialize")),
+        ("CapabilitySecurityContext", serde_json::to_value(security_context).expect("serialize")),
+        (
+            "OperationalModeInputs",
+            serde_json::to_value(mode.derivation_inputs.clone()).expect("serialize"),
+        ),
+        ("OperationalMode", serde_json::to_value(mode).expect("serialize")),
+    ]
+}
+
+#[test]
+fn m1a_struct_surfaces_match_manifest() {
+    let manifest = load_manifest();
+    for (type_name, sample) in m1a_samples() {
+        let expected: BTreeSet<String> = manifest["types"][type_name]["serialized_keys"]
+            .as_array()
+            .expect("serialized_keys array")
+            .iter()
+            .map(|v| v.as_str().unwrap().to_string())
+            .collect();
+
+        let actual: BTreeSet<String> = sample
+            .as_object()
+            .expect("object")
+            .keys()
+            .cloned()
+            .collect();
+
+        assert_eq!(
+            actual, expected,
+            "{type_name} serialized field set drifted from the manifest"
+        );
+    }
+}
+
+#[test]
+fn m1a_serialized_surface_has_no_authority_keys() {
+    // Non-collapse guard: no M1-A serialized field may imply authority
+    // (Registry ≠ Authority, Capability ≠ Permission). Authority verbs live in
+    // transition/approval semantics, never in observational data fields.
+    let forbidden = ["enable", "authorize", "activate", "permission", "grant", "decide"];
+    let manifest = load_manifest();
+    let m1a_types: Vec<String> = m1a_samples()
+        .iter()
+        .map(|(name, _)| name.to_string())
+        .collect();
+    for type_name in &m1a_types {
+        if let Some(keys) = manifest["types"][type_name]["serialized_keys"].as_array() {
+            for key in keys {
+                let key = key.as_str().unwrap();
+                for word in forbidden {
+                    assert!(
+                        !key.contains(word),
+                        "{type_name} serialized key '{key}' contains authority term '{word}'"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn fixture_and_source_hashes_match_manifest() {
     let manifest = load_manifest();
 
@@ -280,5 +543,5 @@ fn fixture_and_source_hashes_match_manifest() {
         );
         verified += 1;
     }
-    assert_eq!(verified, 7, "manifest must pin 3 fixtures + 4 sources");
+    assert_eq!(verified, 8, "manifest must pin 3 fixtures + 5 sources");
 }
