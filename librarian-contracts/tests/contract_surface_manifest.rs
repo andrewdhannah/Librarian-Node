@@ -22,6 +22,11 @@ use librarian_contracts::node::capability_registry::{
     QualificationRecordStatus, QualificationState, SecurityClassification, TransitionType,
     TransitionerRole,
 };
+use librarian_contracts::node::registry_observation::{
+    AuthorityAxis, AvailabilityAxis, CapabilityObservation, CapabilityTypeDefinition,
+    CapabilityVersionRecord, RegistryIdentity, RegistryObservationEnvelope, RegistryOverview,
+    TypeCategory,
+};
 use librarian_contracts::node::startup::{
     is_sha256_hex, RuntimeLifecycleState, StartupCheck, StartupPhase, StartupStatus,
 };
@@ -565,6 +570,238 @@ fn m1b_read_boundary_declared_in_manifest() {
 }
 
 #[test]
+fn m1b_types_declared_in_manifest() {
+    let manifest = load_manifest();
+    let types = manifest["types"].as_object().expect("types object");
+    for name in [
+        "AvailabilityAxis",
+        "AuthorityAxis",
+        "TypeCategory",
+        "CapabilityObservation",
+        "CapabilityVersionRecord",
+        "CapabilityTypeDefinition",
+        "RegistryOverview",
+        "RegistryIdentity",
+        "RegistryObservationEnvelope",
+    ] {
+        assert!(types.contains_key(name), "manifest must declare M1-B type {name}");
+    }
+}
+
+#[test]
+fn m1b_enum_variant_surfaces_match_manifest() {
+    let manifest = load_manifest();
+    let enums: Vec<(&str, Vec<&'static str>)> = vec![
+        ("AvailabilityAxis", variant_names(&AvailabilityAxis::ALL, AvailabilityAxis::as_str)),
+        ("AuthorityAxis", variant_names(&AuthorityAxis::ALL, AuthorityAxis::as_str)),
+        ("TypeCategory", variant_names(&TypeCategory::ALL, TypeCategory::as_str)),
+    ];
+
+    for (type_name, actual) in &enums {
+        let expected: Vec<String> = manifest["types"][type_name]["variants"]
+            .as_array()
+            .expect("variants array")
+            .iter()
+            .map(|v| v.as_str().unwrap().to_string())
+            .collect();
+        assert_eq!(
+            *actual, expected,
+            "{type_name} variants drifted from the manifest"
+        );
+
+        // Every variant must round-trip through serde (serde names == manifest names).
+        for name in &expected {
+            let value: serde_json::Value =
+                serde_json::from_str(&format!("\"{name}\"")).expect("deserialize {type_name}");
+            assert!(value.as_str().is_some(), "{type_name} variant {name} not deserializable");
+        }
+    }
+}
+
+/// Sample M1-B records as serialized JSON, keyed by manifest type name.
+fn m1b_samples() -> Vec<(&'static str, serde_json::Value)> {
+    let id_a = CapabilityId::new("alpha".to_string()).expect("valid id");
+    let version = CapabilityVersion::new(1).expect("valid version");
+
+    let observation = CapabilityObservation {
+        capability_id: id_a.clone(),
+        name: "Alpha Capability".to_string(),
+        capability_type: CapabilityType::Skill,
+        version: Some(version),
+        lifecycle_state: QualificationState::Reviewed,
+        availability: AvailabilityAxis::Registered,
+        qualification: QualificationAxis::Passed,
+        authority: AuthorityAxis::Approved,
+    };
+
+    let version_record = CapabilityVersionRecord {
+        capability_id: id_a.clone(),
+        version,
+        content_hash: "a".repeat(64),
+        changelog: Some("initial".to_string()),
+        author: Some("evaluator@librarian".to_string()),
+        review_notes: None,
+        qualification_evidence_id: Some("EV-00001".to_string()),
+        profile_id: Some("PROF-001".to_string()),
+        created_at: "2026-08-07T09:00:00Z".to_string(),
+    };
+
+    let type_definition = CapabilityTypeDefinition {
+        capability_type_id: "design-review".to_string(),
+        name: "Design Review".to_string(),
+        description: "review design".to_string(),
+        category: TypeCategory::Standard,
+        default_profile_id: Some("PROF-001".to_string()),
+        default_policy_id: None,
+    };
+
+    let overview = sample_overview();
+
+    let identity = RegistryIdentity {
+        value: "abcd1234".to_string(),
+        source: "capability_registry_meta".to_string(),
+        derivation: "sha256 over sorted capability_registry_meta key/value pairs".to_string(),
+    };
+
+    let envelope = RegistryObservationEnvelope {
+        node_id: "WINPC-BIG-PICKLE".to_string(),
+        registry_identity: identity.clone(),
+        projection_observed_at: "2026-08-07T12:00:00Z".to_string(),
+        projection: overview.clone(),
+    };
+
+    vec![
+        ("CapabilityObservation", serde_json::to_value(observation).expect("serialize")),
+        ("CapabilityVersionRecord", serde_json::to_value(version_record).expect("serialize")),
+        ("CapabilityTypeDefinition", serde_json::to_value(type_definition).expect("serialize")),
+        ("RegistryOverview", serde_json::to_value(overview).expect("serialize")),
+        ("RegistryIdentity", serde_json::to_value(identity).expect("serialize")),
+        (
+            "RegistryObservationEnvelope",
+            serde_json::to_value(envelope).expect("serialize"),
+        ),
+    ]
+}
+
+/// Deterministic overview sample with zero-count groups present.
+fn sample_overview() -> RegistryOverview {
+    RegistryOverview {
+        capability_count: 1,
+        by_status: vec![
+            ("unreviewed".to_string(), 0),
+            ("reviewed".to_string(), 1),
+            ("qualified".to_string(), 0),
+            ("deprecated".to_string(), 0),
+            ("revoked".to_string(), 0),
+        ],
+        by_availability: vec![
+            ("discovered".to_string(), 0),
+            ("registered".to_string(), 1),
+            ("disabled".to_string(), 0),
+            ("removed".to_string(), 0),
+        ],
+        by_qualification: vec![
+            ("not_tested".to_string(), 0),
+            ("qualifying".to_string(), 0),
+            ("passed".to_string(), 1),
+            ("failed".to_string(), 0),
+            ("stale".to_string(), 0),
+            ("suspended".to_string(), 0),
+        ],
+        by_authority: vec![
+            ("not_submitted".to_string(), 0),
+            ("pending_review".to_string(), 0),
+            ("approved".to_string(), 1),
+            ("rejected".to_string(), 0),
+            ("revoked".to_string(), 0),
+        ],
+        by_type: vec![
+            ("skill".to_string(), 1),
+            ("workflow".to_string(), 0),
+            ("policy".to_string(), 0),
+            ("validator".to_string(), 0),
+            ("template".to_string(), 0),
+        ],
+        version_count: 1,
+        dependency_count: 0,
+        dependency_by_relationship: vec![
+            ("requires".to_string(), 0),
+            ("extends".to_string(), 0),
+            ("refines".to_string(), 0),
+            ("conflicts".to_string(), 0),
+        ],
+        type_count: 1,
+        types_by_category: vec![
+            ("standard".to_string(), 1),
+            ("system".to_string(), 0),
+            ("experimental".to_string(), 0),
+            ("external".to_string(), 0),
+        ],
+    }
+}
+
+#[test]
+fn m1b_struct_surfaces_match_manifest() {
+    let manifest = load_manifest();
+    for (type_name, sample) in m1b_samples() {
+        let expected: BTreeSet<String> = manifest["types"][type_name]["serialized_keys"]
+            .as_array()
+            .expect("serialized_keys array")
+            .iter()
+            .map(|v| v.as_str().unwrap().to_string())
+            .collect();
+
+        let actual: BTreeSet<String> = sample
+            .as_object()
+            .expect("object")
+            .keys()
+            .cloned()
+            .collect();
+
+        assert_eq!(
+            actual, expected,
+            "{type_name} serialized field set drifted from the manifest"
+        );
+    }
+}
+
+#[test]
+fn m1b_serialized_surface_has_no_authority_keys() {
+    // Non-collapse guard (M1-B): no serialized field may imply authority or
+    // mutation (Registry ≠ Authority, Observation ≠ Mutation). Authority verbs
+    // live in governed operations, never in observational data fields.
+    let forbidden = [
+        "enable",
+        "authorize",
+        "activate",
+        "permission",
+        "grant",
+        "decide",
+        "transition",
+        "mutate",
+        "write",
+    ];
+    let manifest = load_manifest();
+    let m1b_types: Vec<String> = m1b_samples()
+        .iter()
+        .map(|(name, _)| name.to_string())
+        .collect();
+    for type_name in &m1b_types {
+        if let Some(keys) = manifest["types"][type_name]["serialized_keys"].as_array() {
+            for key in keys {
+                let key = key.as_str().unwrap();
+                for word in forbidden {
+                    assert!(
+                        !key.contains(word),
+                        "{type_name} serialized key '{key}' contains authority/mutation term '{word}'"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn fixture_and_source_hashes_match_manifest() {
     let manifest = load_manifest();
 
@@ -587,5 +824,5 @@ fn fixture_and_source_hashes_match_manifest() {
         );
         verified += 1;
     }
-    assert_eq!(verified, 9, "manifest must pin 3 fixtures + 6 sources");
+    assert_eq!(verified, 10, "manifest must pin 3 fixtures + 7 sources");
 }

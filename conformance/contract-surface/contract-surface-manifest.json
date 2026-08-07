@@ -2,8 +2,8 @@
   "manifest_id": "CONTRACT-SURFACE-MANIFEST-001",
   "manifest_version": "1.0.0",
   "created": "2026-08-06T22:24:54Z",
-  "last_rebaseline": "2026-08-07 (M1-B-0 contract lock: runtime registry projection adapter declared under existing suite REGISTRY-OBSERVATION-SCHEMA-001; no Rust types added yet)",
-  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState), M1-0 (capability contract set), M1-A (capability registry implementation types), and M1-B-0 (runtime registry projection adapter). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
+  "last_rebaseline": "2026-08-07 (M1-B types: 9 registry observation projection types added under existing suite REGISTRY-OBSERVATION-SCHEMA-001; registry_observation.rs source pinned; mod.rs re-baselined)",
+  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState), M1-0 (capability contract set), M1-A (capability registry implementation types), M1-B-0 (runtime registry projection adapter), and M1-B (registry observation projection types). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
   "source": {
     "repository": "github.com/andrewdhannah/Librarian-Node",
     "librarian_contracts_head": "f5959d310e010d7e9e7f97aad1f38ac369109086",
@@ -345,6 +345,116 @@
         "evidence_references": { "serde_name": "evidence_references", "type": "String[]" }
       },
       "note": "projection OUTPUT only — the derivation function lives in the projection layer (M1-D), never on this data type"
+    },
+    "AvailabilityAxis": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["discovered", "registered", "disabled", "removed"],
+      "note": "capabilities.availability axis (default registered); no CHECK constraint in schema — unknown persisted values fail closed at projection time (M1-B decision 3)"
+    },
+    "AuthorityAxis": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["not_submitted", "pending_review", "approved", "rejected", "revoked"],
+      "note": "capabilities.authority axis (default not_submitted); observational — reports the axis value, never grants/reviews/revokes authority"
+    },
+    "TypeCategory": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": ["standard", "system", "experimental", "external"],
+      "note": "capability_types.category (default standard); distinct from the CapabilityType enum — classifies taxonomy ROWS (naming guard, M1-B decision 4)"
+    },
+    "CapabilityObservation": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["capability_id", "name", "capability_type", "version", "lifecycle_state", "availability", "qualification", "authority"],
+      "fields": {
+        "capability_id": { "serde_name": "capability_id", "type": "CapabilityId" },
+        "name": { "serde_name": "name", "type": "String" },
+        "capability_type": { "serde_name": "capability_type", "type": "CapabilityType" },
+        "version": { "serde_name": "version", "type": "CapabilityVersion|null" },
+        "lifecycle_state": { "serde_name": "lifecycle_state", "type": "QualificationState" },
+        "availability": { "serde_name": "availability", "type": "AvailabilityAxis" },
+        "qualification": { "serde_name": "qualification", "type": "QualificationAxis" },
+        "authority": { "serde_name": "authority", "type": "AuthorityAxis" }
+      },
+      "note": "capability projection payload: CapabilityIdentity (5 fields) + 3 assurance axis column reads; no content/policy/provenance material (RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001 §1.1)"
+    },
+    "CapabilityVersionRecord": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["capability_id", "version", "content_hash", "changelog", "author", "review_notes", "qualification_evidence_id", "profile_id", "created_at"],
+      "fields": {
+        "capability_id": { "serde_name": "capability_id", "type": "CapabilityId" },
+        "version": { "serde_name": "version", "type": "CapabilityVersion" },
+        "content_hash": { "serde_name": "content_hash", "type": "String", "constraint": "SHA-256 hex, 64 chars, non-empty (CR-I-002 evidence anchor)" },
+        "changelog": { "serde_name": "changelog", "type": "String|null" },
+        "author": { "serde_name": "author", "type": "String|null" },
+        "review_notes": { "serde_name": "review_notes", "type": "String|null" },
+        "qualification_evidence_id": { "serde_name": "qualification_evidence_id", "type": "String|null", "constraint": "EV-XXXXX evidence REFERENCE — Evidence Plane owns proof" },
+        "profile_id": { "serde_name": "profile_id", "type": "String|null", "constraint": "FK reference; no profile evaluation" },
+        "created_at": { "serde_name": "created_at", "type": "String", "constraint": "ISO 8601 registry provenance" }
+      },
+      "note": "append-only version projection (CR-I-001); body deliberately NOT exposed — content_hash is the evidence anchor (M1-B decision 1)"
+    },
+    "CapabilityTypeDefinition": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["capability_type_id", "name", "description", "category", "default_profile_id", "default_policy_id"],
+      "fields": {
+        "capability_type_id": { "serde_name": "capability_type_id", "type": "String" },
+        "name": { "serde_name": "name", "type": "String" },
+        "description": { "serde_name": "description", "type": "String" },
+        "category": { "serde_name": "category", "type": "TypeCategory" },
+        "default_profile_id": { "serde_name": "default_profile_id", "type": "String|null" },
+        "default_policy_id": { "serde_name": "default_policy_id", "type": "String|null" }
+      },
+      "note": "capability_types taxonomy ROW projection — not the CapabilityType enum (naming guard, M1-B decision 4)"
+    },
+    "RegistryOverview": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["capability_count", "by_status", "by_availability", "by_qualification", "by_authority", "by_type", "version_count", "dependency_count", "dependency_by_relationship", "type_count", "types_by_category"],
+      "fields": {
+        "capability_count": { "serde_name": "capability_count", "type": "u64" },
+        "by_status": { "serde_name": "by_status", "type": "[group, count][]", "constraint": "QualificationState ALL order; zero-count groups present" },
+        "by_availability": { "serde_name": "by_availability", "type": "[group, count][]", "constraint": "AvailabilityAxis ALL order; zero-count groups present" },
+        "by_qualification": { "serde_name": "by_qualification", "type": "[group, count][]", "constraint": "QualificationAxis ALL order; zero-count groups present" },
+        "by_authority": { "serde_name": "by_authority", "type": "[group, count][]", "constraint": "AuthorityAxis ALL order; zero-count groups present" },
+        "by_type": { "serde_name": "by_type", "type": "[group, count][]", "constraint": "CapabilityType ALL order; zero-count groups present" },
+        "version_count": { "serde_name": "version_count", "type": "u64" },
+        "dependency_count": { "serde_name": "dependency_count", "type": "u64" },
+        "dependency_by_relationship": { "serde_name": "dependency_by_relationship", "type": "[group, count][]", "constraint": "CapabilityRelationshipType ALL order; zero-count groups present" },
+        "type_count": { "serde_name": "type_count", "type": "u64" },
+        "types_by_category": { "serde_name": "types_by_category", "type": "[group, count][]", "constraint": "TypeCategory ALL order; zero-count groups present" }
+      },
+      "note": "deterministic counts over one consistent snapshot; no M1-C/M1-D/F-2 facts (source map §2.5)"
+    },
+    "RegistryIdentity": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["value", "source", "derivation"],
+      "fields": {
+        "value": { "serde_name": "value", "type": "String", "constraint": "SHA-256 over sorted capability_registry_meta (key,value) pairs (M1-B decision 5)" },
+        "source": { "serde_name": "source", "type": "String", "constraint": "authoritative origin, e.g. capability_registry_meta" },
+        "derivation": { "serde_name": "derivation", "type": "String", "constraint": "how the value was obtained" }
+      },
+      "note": "structured provenance — never an unbound field; fail-closed when identity cannot be established (RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001 §3.1)"
+    },
+    "RegistryObservationEnvelope": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["node_id", "registry_identity", "projection_observed_at", "projection"],
+      "fields": {
+        "node_id": { "serde_name": "node_id", "type": "String" },
+        "registry_identity": { "serde_name": "registry_identity", "type": "RegistryIdentity" },
+        "projection_observed_at": { "serde_name": "projection_observed_at", "type": "String", "constraint": "RFC 3339 UTC; ONLY variable field" },
+        "projection": { "serde_name": "projection", "type": "generic (M1-A/M1-B payload)" }
+      },
+      "note": "generic envelope carried by every projection response (contract §3.1); projection payload fully deterministic"
     }
   },
   "fixture_hashes": {
@@ -356,8 +466,9 @@
     "librarian-core/assets/schema/capability-registry-schema.sql": "083e914ba95dd9c1094f69ad0812aa6dd419b817ec938fa23b0fe96d07e65c20",
     "librarian-core/assets/schema/capability-registry-schema-phase3.sql": "03e7d17b4481041962b905f56681fbf8a8397113d8cef3a0f8c0f0802128014d",
     "librarian-contracts/src/node/startup.rs": "c139e14e84970470adcd4c506065160a344e59bc75516d69c492485958210b22",
-    "librarian-contracts/src/node/mod.rs": "8cc48a2816754553429fa3002ea7b1b364d4de3453812a8fd33377f85c566378",
+    "librarian-contracts/src/node/mod.rs": "493a268e49b83625c6ad30f6b92e7ce633b33696280f9c88ca7695f280849e7c",
     "librarian-contracts/src/node/capability_registry.rs": "be0e8bc7dc8ea9e67fd8a4909d44cb1116bd50b3edadb1f829e10bc942d64d42",
+    "librarian-contracts/src/node/registry_observation.rs": "c261ab523cef2f9cd4de9b91032ee186e3bbd1dd347ff0c444743ad9676ef226",
     "contracts/runtime-api/RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001.md": "47dbb7ca8b3786fbc5edd83006a958aac9ebfccb81d04b6ef5ad2afe63dbc380"
   }
 }
