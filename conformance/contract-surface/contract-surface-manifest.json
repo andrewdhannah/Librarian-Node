@@ -2,17 +2,31 @@
   "manifest_id": "CONTRACT-SURFACE-MANIFEST-001",
   "manifest_version": "1.0.0",
   "created": "2026-08-06T22:24:54Z",
-  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine. Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
+  "last_rebaseline": "2026-08-06 (M1-0 contract surface lock: capability contract set added; no Rust types added yet — types enter the manifest with the M1 implementation)",
+  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState) and M1-0 (capability contract set). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
   "source": {
     "repository": "github.com/andrewdhannah/Librarian-Node",
     "librarian_contracts_head": "f5959d310e010d7e9e7f97aad1f38ac369109086",
     "snapshot_state": "working tree at RUST-MIGRATION-M0A implementation start (types below finalized before engine coding)"
   },
-  "schema_suite": ["RECEIPT-SCHEMA-001"],
+  "schema_suite": [
+    "RECEIPT-SCHEMA-001",
+    "CAPABILITY-ASSURANCE-SCHEMA-001",
+    "CAPABILITY-IDENTITY-SCHEMA-001",
+    "REGISTRY-OBSERVATION-SCHEMA-001",
+    "QUALIFICATION-STATE-SCHEMA-001",
+    "OPERATIONAL-MODE-DERIVATION-SCHEMA-001"
+  ],
   "contracts": [
     "contracts/startup/STARTUP-PROTOCOL.md",
     "contracts/startup/STARTUP-OUTPUT-CONTRACT.md",
     "contracts/startup/SESSION-IDENTITY-CONTRACT.md",
+    "contracts/runtime-api/RUNTIME-API-CONTRACT-001.md",
+    "contracts/capability/CAPABILITY-ASSURANCE-CONTRACT-001.md",
+    "contracts/capability/CAPABILITY-IDENTITY-CONTRACT-001.md",
+    "contracts/capability/REGISTRY-OBSERVATION-CONTRACT-001.md",
+    "contracts/capability/QUALIFICATION-STATE-CONTRACT-001.md",
+    "contracts/capability/OPERATIONAL-MODE-DERIVATION-CONTRACT-001.md",
     "schemas/startup-receipt.schema.json"
   ],
   "serialization": {

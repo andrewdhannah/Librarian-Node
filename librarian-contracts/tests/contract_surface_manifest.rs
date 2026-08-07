@@ -210,6 +210,54 @@ fn runtime_lifecycle_state_surface_matches_manifest() {
 }
 
 #[test]
+fn m1_contract_surface_declared_in_manifest() {
+    // M1-0 surface lock: the five capability contracts and their suites must be
+    // declared in the manifest. Removing or renaming them fails the guard;
+    // updating the surface requires a deliberate manifest re-baseline.
+    let manifest = load_manifest();
+
+    let expected_contracts = [
+        "contracts/capability/CAPABILITY-ASSURANCE-CONTRACT-001.md",
+        "contracts/capability/CAPABILITY-IDENTITY-CONTRACT-001.md",
+        "contracts/capability/REGISTRY-OBSERVATION-CONTRACT-001.md",
+        "contracts/capability/QUALIFICATION-STATE-CONTRACT-001.md",
+        "contracts/capability/OPERATIONAL-MODE-DERIVATION-CONTRACT-001.md",
+    ];
+    let declared: BTreeSet<String> = manifest["contracts"]
+        .as_array()
+        .expect("contracts array")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+    for path in expected_contracts {
+        assert!(
+            declared.contains(path),
+            "M1 contract must be declared in the manifest: {path}"
+        );
+    }
+
+    let expected_suites = [
+        "CAPABILITY-ASSURANCE-SCHEMA-001",
+        "CAPABILITY-IDENTITY-SCHEMA-001",
+        "REGISTRY-OBSERVATION-SCHEMA-001",
+        "QUALIFICATION-STATE-SCHEMA-001",
+        "OPERATIONAL-MODE-DERIVATION-SCHEMA-001",
+    ];
+    let suites: BTreeSet<String> = manifest["schema_suite"]
+        .as_array()
+        .expect("schema_suite array")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+    for suite in expected_suites {
+        assert!(
+            suites.contains(suite),
+            "M1 suite must be declared in the manifest: {suite}"
+        );
+    }
+}
+
+#[test]
 fn fixture_and_source_hashes_match_manifest() {
     let manifest = load_manifest();
 
