@@ -658,6 +658,14 @@ async fn main() {
         })
         .unwrap_or_else(|| PathBuf::from("data/registry-apply.json"));
 
+    // Initialize registry observation state (governed projection module)
+    let registry_observation_state = std::sync::Arc::new(
+        librarian_node::registry_observation::RegistryObservationState::new(
+            &node_identity_service.get_identity().node_id,
+            &startup_options.capability_db,
+        ),
+    );
+
     let state = Arc::new(AppState {
         profile_manager,
         config: config.clone(),
@@ -709,6 +717,7 @@ async fn main() {
         )),
         model_runtime_service: tokio::sync::Mutex::new(ModelRuntimeService::new()),
         registry_mcp_service: tokio::sync::Mutex::new(registry_mcp_service),
+        registry_observation_state,
         registry_owner_service: tokio::sync::Mutex::new(
             RegistryOwnerService::new(
                 config

@@ -27,6 +27,7 @@ use crate::node::{
     RegistryOwnerService, RegistrationService, SessionService, WorkloadLifecycleService,
     WorkloadSessionService, require_active_session,
 };
+use crate::registry_observation::RegistryObservationState;
 use crate::process::{BackendProcess, BackendState};
 use crate::refusal;
 use crate::residency::ModelResidencySupervisor;
@@ -142,6 +143,8 @@ pub struct AppState {
     pub model_runtime_service: tokio::sync::Mutex<ModelRuntimeService>,
     /// Registry MCP service — MCP tool catalog and execution for registry operations
     pub registry_mcp_service: tokio::sync::Mutex<RegistryMcpService>,
+    /// Registry observation state — governed projection module for registry observation
+    pub registry_observation_state: Arc<RegistryObservationState>,
     /// Registry owner service — owner action lifecycle for registry state changes
     pub registry_owner_service: tokio::sync::Mutex<RegistryOwnerService>,
     /// Registry apply service — apply boundary state machine for registry operations
@@ -3253,16 +3256,32 @@ async fn handle_registry_candidate_expire(
 // ============================================================================
 
 /// GET /registry/mcp/catalog — returns the full MCP tool catalog
+/// (legacy tools + observation tools from the governed projection boundary)
 async fn handle_registry_mcp_catalog(State(state): State<Arc<AppState>>) -> Json<librarian_contracts::registry_mcp::McpToolCatalog> {
     let mcp = state.registry_mcp_service.lock().await;
-    Json(mcp.get_tool_catalog())
+    let mut catalog = mcp.get_tool_catalog();
+    // Append observation tools from the governed projection boundary
+    let mut observation_tools = crate::node::registry_observation_mcp::define_observation_tools();
+    catalog.tools.append(&mut observation_tools);
+    Json(catalog)
 }
 
 /// POST /registry/mcp/execute — execute an MCP tool request
+/// (dispatches to legacy tools or observation tools based on tool name)
 async fn handle_registry_mcp_execute(
     State(state): State<Arc<AppState>>,
     axum::Json(body): axum::Json<librarian_contracts::registry_mcp::McpToolRequest>,
 ) -> (StatusCode, Json<librarian_contracts::registry_mcp::McpToolResponse>) {
+    // Observation tools are dispatched to the governed projection boundary
+    if body.tool_name.starts_with("registry.observe_") {
+        let response = crate::node::registry_observation_mcp::execute_observation_tool(
+            body,
+            &state.registry_observation_state,
+        );
+        return (StatusCode::OK, Json(response));
+    }
+
+    // Legacy tools dispatched through the existing MCP service
     let mut mcp = state.registry_mcp_service.lock().await;
     let candidates = state.registry_candidate_service.lock().await;
     let identity = state.node_identity_service.clone();
