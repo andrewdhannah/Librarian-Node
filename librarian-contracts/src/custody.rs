@@ -219,6 +219,172 @@ pub struct CustodyEnvelope {
     pub schema_version: String,
 }
 
+/// Custody metadata attached to a receipt envelope.
+/// Maps to the metadata block on Swift custody chain entries.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustodyMetadata {
+    /// Source of the receipt (e.g., `"node"`).
+    pub source: String,
+    /// Metadata schema version.
+    pub version: String,
+    /// Optional free-form notes.
+    pub notes: Option<String>,
+}
+
+/// A receipt envelope — an immutable, hash-chained evidence record.
+/// Each envelope links to its predecessor via `previous_envelope_id` and
+/// `previous_envelope_hash`; `chain_hash` covers the cumulative chain.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReceiptEnvelope {
+    /// Unique envelope identifier.
+    pub envelope_id: String,
+    /// Node that produced the receipt.
+    pub node_id: String,
+    /// Receipt type (e.g., `"identity"`, `"workload_allocation_link"`).
+    pub receipt_type: String,
+    /// Original receipt identifier.
+    pub receipt_id: String,
+    /// The receipt payload itself.
+    pub receipt_payload: serde_json::Value,
+    /// SHA-256 of the serialized payload.
+    pub receipt_hash: String,
+    /// Envelope ID of the predecessor in the chain, if any.
+    pub previous_envelope_id: Option<String>,
+    /// Chain hash of the predecessor, if any.
+    pub previous_envelope_hash: Option<String>,
+    /// SHA-256 covering this envelope's receipt hash (and predecessor chain hash when present).
+    pub chain_hash: String,
+    /// ISO 8601 timestamp.
+    pub timestamp: String,
+    /// Optional custody metadata.
+    pub metadata: Option<CustodyMetadata>,
+}
+
+/// A custody chain — aggregate state of a hash-linked envelope sequence.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustodyChain {
+    /// Unique chain identifier.
+    pub chain_id: String,
+    /// Node that owns the chain.
+    pub node_id: String,
+    /// When the chain was created (ISO 8601).
+    pub created_at: String,
+    /// Number of envelopes in the chain.
+    pub envelope_count: u32,
+    /// Envelope ID of the first envelope.
+    pub first_envelope_id: String,
+    /// Envelope ID of the last envelope.
+    pub last_envelope_id: String,
+    /// Chain hash of the last envelope.
+    pub last_chain_hash: String,
+    /// Chain status (e.g., `"active"`).
+    pub status: String,
+}
+
+/// Provenance query — filter parameters for custody envelope lookups.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProvenanceQuery {
+    /// Optional node ID filter.
+    pub node_id: Option<String>,
+    /// Optional receipt type filter.
+    pub receipt_type: Option<String>,
+    /// Inclusive lower timestamp bound.
+    pub from_timestamp: Option<String>,
+    /// Inclusive upper timestamp bound.
+    pub to_timestamp: Option<String>,
+}
+
+/// A single provenance relationship between envelopes.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProvenanceLink {
+    /// Predecessor envelope ID.
+    pub from_envelope_id: String,
+    /// Successor envelope ID.
+    pub to_envelope_id: String,
+    /// Relationship label (e.g., `"precedes"`).
+    pub relationship: String,
+}
+
+/// Provenance result — an envelope plus a human-readable summary.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProvenanceResult {
+    /// The matched envelope.
+    pub envelope: ReceiptEnvelope,
+    /// Receipt type of the matched envelope.
+    pub receipt_type: String,
+    /// Summary string (`<receipt_type>:<receipt_id>`).
+    pub receipt_summary: String,
+}
+
+/// Provenance graph — full custody history for a node.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProvenanceGraph {
+    /// Node that owns the graph.
+    pub node_id: String,
+    /// All envelopes in the chain.
+    pub envelopes: Vec<ReceiptEnvelope>,
+    /// Precedes-relationships between envelopes.
+    pub relationships: Vec<ProvenanceLink>,
+}
+
+/// Integrity error — a single detected violation in a custody chain.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IntegrityError {
+    /// Envelope ID where the violation was detected.
+    pub envelope_id: String,
+    /// Error type (`tampered_payload`, `broken_chain`, `missing_previous`, `hash_mismatch`).
+    pub error_type: String,
+    /// Human-readable details.
+    pub details: String,
+}
+
+/// Integrity report — result of verifying a custody chain.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IntegrityReport {
+    /// Chain that was verified.
+    pub chain_id: String,
+    /// Node that owns the chain.
+    pub node_id: String,
+    /// Whether the chain is intact.
+    pub verified: bool,
+    /// Number of envelopes recorded in the chain state.
+    pub envelope_count: u32,
+    /// Number of envelopes actually checked.
+    pub envelopes_checked: u32,
+    /// Detected violations (empty when verified).
+    pub errors: Vec<IntegrityError>,
+    /// ISO 8601 verification timestamp.
+    pub verified_at: String,
+}
+
+/// Retention policy — bounds for pruning custody envelopes.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RetentionPolicy {
+    /// Unique policy identifier.
+    pub policy_id: String,
+    /// Maximum number of envelopes to retain.
+    pub max_envelopes: Option<u32>,
+    /// Retain only envelopes newer than this many days.
+    pub retention_days: Option<u32>,
+}
+
+/// Retention result — outcome of applying a retention policy.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RetentionResult {
+    /// Policy that was applied.
+    pub policy_id: String,
+    /// Envelopes before pruning.
+    pub envelopes_before: u32,
+    /// Envelopes after pruning.
+    pub envelopes_after: u32,
+    /// Envelopes archived (always 0 in current implementation).
+    pub archived: u32,
+    /// Envelopes deleted.
+    pub deleted: u32,
+    /// ISO 8601 application timestamp.
+    pub applied_at: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,0 +1,71 @@
+{
+  "fixture_id": "CANONICAL-STARTUP-INPUT-001",
+  "fixture_version": "1.0.0",
+  "description": "Canonical deterministic input for the Rust M0A startup engine (C0-C2 conformance path). Emitting this input must produce a startup receipt whose deterministic fields match conformance/fixtures/startup/expected-startup-receipt.json.",
+  "sources": [
+    "platform/windows/node-identity.json",
+    "platform/windows/capabilities.json",
+    "governance-sync.json (G:\\OpenWork\\runtime-node\\governance-sync.json)"
+  ],
+  "schema": "schemas/startup-receipt.schema.json",
+  "platform": "windows",
+  "expected_governance_commit": "6be76216a8048492526c4ca0ae751b6d2d507185",
+  "node_directory": {
+    "node-identity.json": {
+      "node_type": "librarian-runtime-node",
+      "node_id": "WINPC-BIG-PICKLE",
+      "authority": "owner-controlled",
+      "platform": "windows",
+      "governance_commit": "6be76216a8048492526c4ca0ae751b6d2d507185",
+      "state": "GOVERNED_EXECUTION",
+      "capabilities": [
+        "governance_read",
+        "governance_verify",
+        "execution_allowed",
+        "evidence_generation",
+        "custody_tracking",
+        "receipt_validation"
+      ],
+      "created_at": "2026-07-24T22:18:00.0000000Z"
+    },
+    "governance-sync.json": {
+      "source": "github.com/andrewdhannah/Librarian-Node",
+      "verification_status": "verified",
+      "load_status": "complete",
+      "node_loaded": true,
+      "contracts_loaded": true,
+      "core_loaded": true,
+      "sync_status": "complete",
+      "last_verified_commit": "6be76216a8048492526c4ca0ae751b6d2d507185"
+    },
+    "capabilities.json": {
+      "governance_read": true,
+      "governance_verify": true,
+      "execution_allowed": true,
+      "evidence_generation": true,
+      "custody_tracking": true,
+      "receipt_validation": true,
+      "governance_write": false
+    }
+  },
+  "sqlite": {
+    "path": "<runtime-db-path>",
+    "create_if_missing": true,
+    "schema_source": "capability-registry/schema/capability-registry-schema.sql (TheLibrarian@15c5ef2, Phase 2: 9 tables + Phase 3: 2 tables)",
+    "note": "M0A creates/opens the database and applies the canonical schema; registry state is then read from it"
+  },
+  "startup_contract": {
+    "protocol": "contracts/startup/STARTUP-PROTOCOL.md",
+    "phases": [
+      "identity_loading",
+      "governance_verification",
+      "capability_loading",
+      "environment_validation",
+      "receipt_generation",
+      "governed_mode"
+    ],
+    "expected_checks_passed": 6,
+    "expected_checks_failed": 0,
+    "expected_status": "GOVERNED_EXECUTION"
+  }
+}
