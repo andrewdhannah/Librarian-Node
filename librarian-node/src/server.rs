@@ -3661,6 +3661,115 @@ async fn handle_registry_apply_history(
 }
 
 // ============================================================================
+// Registry Observation HTTP Adapters (M1-C2)
+// ============================================================================
+
+/// GET /registry/observe/capabilities — observe capability types through the governed projection boundary
+async fn handle_observe_capabilities(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_types() {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/capabilities/{id} — observe a single capability through the governed projection boundary
+async fn handle_observe_capability(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(capability_id): axum::extract::Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability(&capability_id) {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/versions/{id} — observe capability versions through the governed projection boundary
+async fn handle_observe_versions(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(capability_id): axum::extract::Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_versions(&capability_id) {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/dependencies/{id} — observe capability dependencies through the governed projection boundary
+async fn handle_observe_dependencies(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(capability_id): axum::extract::Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_dependencies(&capability_id) {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/types — observe capability type taxonomy through the governed projection boundary
+async fn handle_observe_types(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_types() {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/overview — observe registry overview counts through the governed projection boundary
+async fn handle_observe_overview(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.registry_overview() {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// Map projection errors to stable HTTP error responses.
+///
+/// Error metadata does not contain transport identity, internal storage paths,
+/// or SQL query text. HTTP connection identity is NOT injected into error responses.
+fn observation_error_response(e: anyhow::Error) -> (StatusCode, Json<serde_json::Value>) {
+    let error_msg = e.to_string();
+    let (code, message, status) = if error_msg.contains("registry identity fail-closed") {
+        ("REGISTRY_IDENTITY_UNAVAILABLE", error_msg, StatusCode::SERVICE_UNAVAILABLE)
+    } else if error_msg.contains("fail-closed invariant violation") {
+        ("INVARIANT_VIOLATION", error_msg, StatusCode::INTERNAL_SERVER_ERROR)
+    } else if error_msg.contains("not found in registry") {
+        ("CAPABILITY_NOT_FOUND", error_msg, StatusCode::NOT_FOUND)
+    } else if error_msg.contains("no such table") || error_msg.contains("cannot read") {
+        ("REGISTRY_NOT_INITIALIZED", error_msg, StatusCode::SERVICE_UNAVAILABLE)
+    } else {
+        ("PROJECTION_SNAPSHOT_FAILED", error_msg, StatusCode::INTERNAL_SERVER_ERROR)
+    };
+
+    (status, Json(serde_json::json!({
+        "code": code,
+        "message": message
+    })))
+}
+
+// ============================================================================
 // Router construction
 // ============================================================================
 
@@ -3839,6 +3948,13 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/registry/candidate/expire", post(handle_registry_candidate_expire))
         .route("/registry/mcp/catalog", get(handle_registry_mcp_catalog))
         .route("/registry/mcp/execute", post(handle_registry_mcp_execute))
+        // Registry observation routes (M1-C2) — governed projection boundary
+        .route("/registry/observe/capabilities", get(handle_observe_capabilities))
+        .route("/registry/observe/capabilities/{id}", get(handle_observe_capability))
+        .route("/registry/observe/versions/{id}", get(handle_observe_versions))
+        .route("/registry/observe/dependencies/{id}", get(handle_observe_dependencies))
+        .route("/registry/observe/types", get(handle_observe_types))
+        .route("/registry/observe/overview", get(handle_observe_overview))
         .route("/registry/health", get(handle_registry_health))
         .route("/registry/cleanup", post(handle_registry_cleanup))
         .route("/registry/version", get(handle_registry_version))
