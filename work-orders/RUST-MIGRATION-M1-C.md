@@ -9,9 +9,9 @@
 
 **Owner approval (verbatim positions):**
 1. MCP tool naming — **Approve `registry.observe_*`.** The `observe_` prefix preserves the semantic boundary. It avoids implying ownership (`manage_*`), authority (`control_*`), or mutation (`update_*`). Five tools: `registry.observe_capability`, `registry.observe_versions`, `registry.observe_dependencies`, `registry.observe_types`, `registry.observe_overview`.
-2. HTTP route prefix — **Approve `/registry/observe/*`.** Routes: `GET /registry/observe/capability/{id}`, `GET /registry/observe/versions/{id}`, `GET /registry/observe/dependencies/{id}`, `GET /registry/observe/types`, `GET /registry/observe/overview`. Avoid `/api/registry/*`, `/registry/*`, `/admin/registry/*`.
+2. HTTP route prefix — **Approve `/registry/observe/*`.** Routes: `GET /registry/observe/capabilities`, `GET /registry/observe/capabilities/{id}`, `GET /registry/observe/versions/{id}`, `GET /registry/observe/dependencies/{id}`, `GET /registry/observe/types`, `GET /registry/observe/overview`. Avoid `/api/registry/*`, `/registry/*`, `/admin/registry/*`.
 3. Existing JSON-file services — **Remain parallel initially.** Do not migrate in M1-C. Replacing them would combine adapter migration with storage/service migration, violating migration discipline. M1-C non-goal: existing JSON-backed services are not removed, rewritten, or redirected during M1-C.
-4. Error format — **Approve structured JSON.** `{ "code": "...", "message": "...", "registry_identity": "...", "observed_at": "..." }` where available. Error metadata may describe observation failure; error metadata must not introduce transport identity as registry identity.
+4. Error format — **Approve structured JSON.** `{ "code": "...", "message": "...", "registry_identity": "...", "observed_at": "..." }` where available. Error codes: `REGISTRY_IDENTITY_UNAVAILABLE`, `PROJECTION_SNAPSHOT_FAILED`, `REGISTRY_NOT_INITIALIZED`, `UNSUPPORTED_OBSERVATION`, `CAPABILITY_NOT_FOUND`, `INVARIANT_VIOLATION`.
 5. Pagination — **Deferred.** No pagination in M1-C. Pagination introduces additional semantics (ordering guarantees, cursor identity, snapshot continuation, partial observation behavior) that belong to a later scale/concurrency phase.
 
 **Approved implementation sequence:** adapter contracts → owner review → canonical lock → manifest/drift guard → MCP adapter → HTTP adapter → evidence + seal.
@@ -132,13 +132,14 @@ Five tools mapping 1:1 to projection methods:
 
 ### 2.4 HTTP Route Definitions
 
-Five routes mapping 1:1 to projection methods:
+Six routes mapping 1:1 to projection methods:
 
 | HTTP Route | Method | Projection Method | Input | Output |
 |------------|--------|-------------------|-------|--------|
-| `GET /registry/observe/capability/{id}` | GET | `capability(id)` | Path param: `id` | `RegistryObservationEnvelope<CapabilityObservation>` |
-| `GET /registry/observe/versions/{id}` | GET | `capability_versions(id)` | Path param: `id` | `RegistryObservationEnvelope<Vec<CapabilityVersionRecord>>` |
-| `GET /registry/observe/dependencies/{id}` | GET | `capability_dependencies(id)` | Path param: `id` | `RegistryObservationEnvelope<Vec<CapabilityDependency>>` |
+| `GET /registry/observe/capabilities` | GET | `capability_types()` | None | `RegistryObservationEnvelope<Vec<CapabilityTypeDefinition>>` |
+| `GET /registry/observe/capabilities/{id}` | GET | `capability(id)` | Path: `id` | `RegistryObservationEnvelope<CapabilityObservation>` |
+| `GET /registry/observe/versions/{id}` | GET | `capability_versions(id)` | Path: `id` | `RegistryObservationEnvelope<Vec<CapabilityVersionRecord>>` |
+| `GET /registry/observe/dependencies/{id}` | GET | `capability_dependencies(id)` | Path: `id` | `RegistryObservationEnvelope<Vec<CapabilityDependency>>` |
 | `GET /registry/observe/types` | GET | `capability_types()` | None | `RegistryObservationEnvelope<Vec<CapabilityTypeDefinition>>` |
 | `GET /registry/observe/overview` | GET | `registry_overview()` | None | `RegistryObservationEnvelope<RegistryOverview>` |
 
@@ -150,7 +151,7 @@ Structured JSON error response:
 
 ```json
 {
-  "code": "REGISTRY_OBSERVATION_ERROR",
+  "code": "REGISTRY_OBSERVATION_FAILED",
   "message": "human readable explanation"
 }
 ```
@@ -159,22 +160,25 @@ When projection identity is available (partial failure):
 
 ```json
 {
-  "code": "REGISTRY_OBSERVATION_ERROR",
+  "code": "REGISTRY_OBSERVATION_FAILED",
   "message": "human readable explanation",
   "registry_identity": "...",
   "observed_at": "..."
 }
 ```
 
-**Error codes:**
+**Stable error codes:**
 
 | Code | Meaning |
 |------|---------|
-| `REGISTRY_OBSERVATION_ERROR` | Generic observation failure |
-| `INVARIANT_VIOLATION` | Fail-closed: unknown enum, absent identity, missing key |
+| `REGISTRY_IDENTITY_UNAVAILABLE` | Registry identity cannot be computed (absent/empty meta) |
+| `PROJECTION_SNAPSHOT_FAILED` | Consistent-snapshot read failed |
+| `REGISTRY_NOT_INITIALIZED` | Registry database not available at expected path |
+| `UNSUPPORTED_OBSERVATION` | Requested observation type not supported |
 | `CAPABILITY_NOT_FOUND` | Requested capability ID not in registry |
+| `INVARIANT_VIOLATION` | Fail-closed: unknown enum, missing key, unrepresentable value |
 
-**Restriction:** error metadata may describe observation failure; error metadata must not introduce transport identity as registry identity.
+**Restrictions:** error metadata may describe observation failure; error metadata must not introduce transport identity as registry identity.
 
 ### 2.6 Pagination
 
@@ -197,13 +201,15 @@ Pagination will be reconsidered when registry cardinality requirements demonstra
 ### 3.2 Adapter Constraints
 
 **Adapters MUST:**
-- Consume projection module output
+- Consume projection module output (`RegistryObservationState` methods)
 - Preserve projection semantics (field names, types, ordering)
 - Preserve failure behavior (fail-closed error codes and messages)
 - Preserve provenance fields (`registry_identity`, `projection_observed_at`, `node_id`)
+- Serialize projection output as JSON matching `serde_json::to_value(&envelope)`
+- Return full `RegistryObservationEnvelope<T>` (no truncation, no subsetting)
 
 **Adapters MUST NOT:**
-- Query registry storage directly
+- Query registry storage directly (SQLite access is forbidden for adapters)
 - Reconstruct projections from raw data
 - Apply qualification logic
 - Evaluate policies
@@ -213,6 +219,7 @@ Pagination will be reconsidered when registry cardinality requirements demonstra
 - Remove fields present in the projection envelope
 - Reinterpret enum values
 - Cache projection output across snapshot boundaries
+- Create authority through transport exposure
 
 ---
 
