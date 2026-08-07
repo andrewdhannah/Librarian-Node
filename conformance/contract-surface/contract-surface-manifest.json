@@ -1,0 +1,101 @@
+{
+  "manifest_id": "CONTRACT-SURFACE-MANIFEST-001",
+  "manifest_version": "1.0.0",
+  "created": "2026-08-06T22:24:54Z",
+  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine. Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
+  "source": {
+    "repository": "github.com/andrewdhannah/Librarian-Node",
+    "librarian_contracts_head": "f5959d310e010d7e9e7f97aad1f38ac369109086",
+    "snapshot_state": "working tree at RUST-MIGRATION-M0A implementation start (types below finalized before engine coding)"
+  },
+  "schema_suite": ["RECEIPT-SCHEMA-001"],
+  "contracts": [
+    "contracts/startup/STARTUP-PROTOCOL.md",
+    "contracts/startup/STARTUP-OUTPUT-CONTRACT.md",
+    "contracts/startup/SESSION-IDENTITY-CONTRACT.md",
+    "schemas/startup-receipt.schema.json"
+  ],
+  "serialization": {
+    "format": "json",
+    "object_key_order": "alphabetical (serde_json default; no preserve_order) — byte order is NOT part of the equivalence surface",
+    "enum_strategy": "serde rename_all (snake_case / SCREAMING_SNAKE_CASE)",
+    "datetime_format": "RFC 3339 seconds, UTC (e.g. 2026-07-25T02:33:33Z)",
+    "receipt_id_format": "{PLATFORM_UPPER}-STARTUP-{YYYYMMDD}-{HHMMSS} UTC (reference-format; variable field)",
+    "variable_fields": ["receipt_id", "timestamp"],
+    "equivalence_surface": "StartupReceiptFacts — 11 deterministic fields, must match exactly across runs and implementations"
+  },
+  "types": {
+    "StartupReceipt": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": [
+        "receipt_id", "node_id", "platform", "governance_commit", "startup_phase",
+        "identity_loaded", "governance_verified", "capabilities_loaded",
+        "environment_validated", "checks_passed", "checks_failed", "status", "timestamp"
+      ],
+      "fields": {
+        "receipt_id": { "serde_name": "receipt_id", "type": "String", "constraint": "pattern ^[A-Z0-9-]+$" },
+        "node_id": { "serde_name": "node_id", "type": "String", "constraint": "non-empty" },
+        "platform": { "serde_name": "platform", "type": "String", "constraint": "windows|linux|macos" },
+        "governance_commit": { "serde_name": "governance_commit", "type": "String", "constraint": "40-char lowercase hex SHA" },
+        "startup_phase": { "serde_name": "startup_phase", "type": "String", "constraint": "complete|failed (schema outcome; distinct from StartupPhase)" },
+        "identity_loaded": { "serde_name": "identity_loaded", "type": "bool" },
+        "governance_verified": { "serde_name": "governance_verified", "type": "bool" },
+        "capabilities_loaded": { "serde_name": "capabilities_loaded", "type": "bool" },
+        "environment_validated": { "serde_name": "environment_validated", "type": "bool" },
+        "checks_passed": { "serde_name": "checks_passed", "type": "u32" },
+        "checks_failed": { "serde_name": "checks_failed", "type": "u32" },
+        "status": { "serde_name": "status", "type": "String", "constraint": "GOVERNED_EXECUTION|STARTUP_FAILED" },
+        "timestamp": { "serde_name": "timestamp", "type": "String", "constraint": "RFC 3339 UTC" }
+      }
+    },
+    "StartupReceiptFacts": {
+      "kind": "struct",
+      "serialized": false,
+      "note": "equivalence surface extraction type — not part of the receipt wire format (Serialize derived solely for the drift-guard test)",
+      "fields": {
+        "node_id": "String", "platform": "String", "governance_commit": "String",
+        "startup_phase": "String", "identity_loaded": "bool", "governance_verified": "bool",
+        "capabilities_loaded": "bool", "environment_validated": "bool",
+        "checks_passed": "u32", "checks_failed": "u32", "status": "String"
+      }
+    },
+    "StartupPhase": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = snake_case",
+      "variants": [
+        "identity_loading", "governance_verification", "capability_loading",
+        "environment_validation", "receipt_generation", "governed_mode"
+      ],
+      "note": "protocol step identity (used by StartupCheck.phase); NOT the receipt startup_phase field"
+    },
+    "StartupStatus": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = SCREAMING_SNAKE_CASE",
+      "variants": ["GOVERNED_EXECUTION", "STARTUP_FAILED"]
+    },
+    "StartupCheck": {
+      "kind": "struct",
+      "serialized": true,
+      "serialized_keys": ["phase", "passed", "detail"],
+      "fields": {
+        "phase": { "serde_name": "phase", "type": "StartupPhase" },
+        "passed": { "serde_name": "passed", "type": "bool" },
+        "detail": { "serde_name": "detail", "type": "String" }
+      }
+    }
+  },
+  "fixture_hashes": {
+    "conformance/fixtures/startup/canonical-startup-input.json": "1629596f3e9761129236157d36fafcd4757afdad4bc59dd3f14b49cb2f6a418d",
+    "conformance/fixtures/startup/expected-startup-receipt.json": "e1da72fbbbc4c1e69db998d1043687fcb8d521b22c0fe24e11c2a26174656b5b",
+    "schemas/startup-receipt.schema.json": "1012b4a387e67091b88446bf8c1e0d8f8830afe52baef69caf3e92759f78705f"
+  },
+  "source_hashes": {
+    "librarian-core/assets/schema/capability-registry-schema.sql": "083e914ba95dd9c1094f69ad0812aa6dd419b817ec938fa23b0fe96d07e65c20",
+    "librarian-core/assets/schema/capability-registry-schema-phase3.sql": "03e7d17b4481041962b905f56681fbf8a8397113d8cef3a0f8c0f0802128014d",
+    "librarian-contracts/src/node/startup.rs": "f3ef26df13c97742a16ad388824caeb0e155bee7272cd5bc30e7f8c417baffa4",
+    "librarian-contracts/src/node/mod.rs": "f17a91767624a045c70139f56e6cc3692ca7dc5f2999bc0503afef445de306ae"
+  }
+}

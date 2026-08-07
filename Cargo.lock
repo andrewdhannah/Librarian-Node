@@ -817,6 +817,7 @@ dependencies = [
  "chrono",
  "clap",
  "librarian-contracts",
+ "librarian-core",
  "reqwest",
  "rusqlite",
  "serde",

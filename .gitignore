@@ -18,6 +18,8 @@ secrets/
 bin/
 target/
 build/
+# Source binaries (Rust src/bin/) are source, not build output — track them.
+!**/src/bin/
 
 # IDE
 .vscode/

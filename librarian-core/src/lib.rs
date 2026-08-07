@@ -16,3 +16,4 @@ pub mod registry;
 pub mod release;
 pub mod review;
 pub mod routing;
+pub mod startup;

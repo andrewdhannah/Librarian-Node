@@ -92,6 +92,10 @@ Do not add a new crate unless a real boundary appears.
 | SQLite crate | **rusqlite** — M0A is a deterministic bootstrap sequence (synchronous, transaction-like), not a service runtime. sqlx deferred to M0B+ when async runtime services, concurrent node operations, network-facing APIs, and scheduler execution exist. |
 | RUST-M0-7 receipt oracle | **Canonical receipt contract + mapped Swift facts.** Do NOT reproduce the Swift `startup-execution-receipt-v1` shape (would be a regression). Migration target: *produce the canonical startup receipt contract while preserving equivalent observable facts*. See `conformance/divergences/STARTUP-RECEIPT-SHAPE-001.md`. |
 | MCP inclusion in M0A | **Deferred.** MCP consumes a validated node runtime; it does not participate in proving the runtime exists. Dependency order: M0A (core startup/contracts/SQLite/registry/receipts) → M0B (runtime API) → M1 (MCP integration) → M2 (agent/runtime orchestration). |
+| RUST-M0-0 contract surface lock | **Before engine implementation.** Snapshot the librarian-contracts interop surface (types, serde names, schema suite IDs, fixture/source hashes) into `conformance/contract-surface/contract-surface-manifest.json`; a drift-guard test enforces it. Prevents accidental contract drift while implementing against the freshly-restored contracts crate. |
+| Receipt types ownership | **Contract objects, not core objects.** `StartupReceipt`, `StartupPhase`, `StartupStatus`, `StartupCheck` live in `librarian-contracts` (interop artifacts). Core holds mechanism (input parsing, verification, engine). Note: receipt `startup_phase` field is the schema outcome (`complete`/`failed`), distinct from the 6-value `StartupPhase` check-step enum — documented in code and manifest. |
+| M0A node entrypoint | **Separate binary** `librarian-node/src/bin/startup_probe.rs`. The router (`src/main.rs`, ROUTER-RUST-HARDEN-1) is untouched; the first production runtime artifact must not couple to HTTP/service concerns. |
+| Canonical schema embedding | Byte-identical copy of `capability-registry-schema.sql` + `-phase3.sql` into `librarian-core/assets/schema/` (provenance README; `include_str!`). Runtime is self-contained and deterministic — no external file lookup at startup. |
 
 **Fixture anchor:** before coding the startup engine, the fixtures at `conformance/fixtures/startup/` are the deterministic target:
 
@@ -107,6 +111,7 @@ Then  emitted receipt matches expected   (expected-startup-receipt.json)
 
 | Gate | Scope | Verification |
 |------|-------|--------------|
+| RUST-M0-0 | M0A | **Contract surface lock.** Before engine implementation, snapshot the librarian-contracts interop surface (`conformance/contract-surface/contract-surface-manifest.json`: type names, fields, serde names, schema suite IDs, fixture + source hashes). Drift fails the guard test `librarian-contracts/tests/contract_surface_manifest.rs`; deliberate re-baseline requires divergence-protocol documentation. |
 | RUST-M0-1 | M0A | Loads a project directory and resolves canonical contract sources |
 | RUST-M0-2 | M0A | Opens/creates SQLite database with schema conforming to canonical schema |
 | RUST-M0-3 | M0A | Loads registry state from database |
@@ -201,16 +206,45 @@ Equivalence per `docs/architecture/THREE-WAY-EQUIVALENCE-PROTOCOL.md`:
 
 ---
 
+### 9. Contract Surface Lock (RUST-M0-0)
+
+| File | Purpose |
+|------|---------|
+| `conformance/contract-surface/contract-surface-manifest.json` | Snapshot of the contracts interop surface (types, serde names, schema suite IDs, fixture + source hashes) at implementation start |
+| `librarian-contracts/tests/contract_surface_manifest.rs` | Drift-guard test — any surface change fails until the manifest is deliberately re-baselined |
+
+---
+
+## Implementation Status (2026-08-06)
+
+Implemented and verified (awaiting owner commit approval):
+
+| Item | Status | Evidence |
+|------|--------|----------|
+| Contract types (`StartupReceipt`, `StartupReceiptFacts`, `StartupPhase`, `StartupStatus`, `StartupCheck`) | Done | `librarian-contracts/src/node/startup.rs`; 12 unit tests PASS |
+| Contract surface lock (RUST-M0-0) | Done | `conformance/contract-surface/contract-surface-manifest.json`; 7 guard tests PASS |
+| Canonical schema embedded (byte-identical) | Done | `librarian-core/assets/schema/` (provenance README; SHA-256 pinned in manifest) |
+| 6-phase startup engine | Done | `librarian-core/src/startup/` (mod, identity, governance, capabilities, environment, receipt, engine) |
+| Fixture-driven conformance test | Done | `librarian-core/tests/m0a_fixture.rs` — 3/3 PASS (canonical input → expected receipt facts; schema creates 11 tables + integrity ok; determinism across runs) |
+| Node probe binary | Done | `librarian-node/src/bin/startup_probe.rs` — real run: 6/6 PASS, `GOVERNED_EXECUTION`, exit 0 |
+| Evidence emission | Done | `evidence/phase0/rust-core/m0/startup-receipt-20260807-022831-071.json` + `-022838-223.json`; deterministic facts equal across runs and match fixture expectation field-for-field |
+| rusqlite dependency | Done | `rusqlite 0.31` (bundled) in `librarian-core` |
+| Pre-existing condition | Noted | 48 `governance::*` legacy tests fail with `no such table: lifecycle_cursors` — reproduced identically at `f5959d3` (before M0A changes) via worktree; environmental (un-migrated test DB), out of M0A scope |
+
+Timing note: engine + probe cold-start well under the <5 s bound; startup is single-threaded, no network.
+
+---
+
 ## Dependencies / Predecessors
 
 - `RUST-CORE-CONFORMANCE-1` complete — conformance spec + subsystem registry + startup engine subsystem spec (`82e3110`)
-- **Workspace compile restoration — complete (this session, uncommitted):**
+- **Workspace compile restoration — committed and pushed (`f5959d3` RUST-MIGRATION-M0A-PREREQ):**
   - `librarian-contracts/src/lib.rs`: declared all 30+ existing modules (were silently undeclared; caused ~100 E0432/E0433 errors)
   - `librarian-contracts/src/custody.rs`: added 11 missing custody contract types (`CustodyMetadata`, `ReceiptEnvelope`, `CustodyChain`, `ProvenanceQuery`, `ProvenanceResult`, `ProvenanceLink`, `ProvenanceGraph`, `IntegrityError`, `IntegrityReport`, `RetentionPolicy`, `RetentionResult`)
   - `cargo check --workspace`: 0 errors; `cargo test -p librarian-contracts`: 150/150 pass
 - Canonical fixtures: `contracts/startup/*`, `schemas/startup-receipt.schema.json`, `evidence/phase0/reference-architecture/startup-receipt-{windows,linux,macos}.json`, node fixtures `platform/<os>/node-identity.json` + `capabilities.json`
 - Conformance fixtures: `conformance/fixtures/startup/` (migration anchor)
-- Dependency to add: `rusqlite` (workspace) with bundled feature for offline deterministic builds
+- Dependency added: `rusqlite 0.31` (bundled) in `librarian-core` — offline deterministic builds
 
 ---
 
