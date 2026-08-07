@@ -7,6 +7,7 @@ pub mod operator;
 pub mod platform;
 pub mod process;
 pub mod refusal;
+pub mod registry_observation;
 pub mod residency;
 pub mod runtime_state;
 pub mod runtime_api;
