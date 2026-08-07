@@ -41,6 +41,34 @@ struct Args {
     /// Path to model-profiles.json (overrides default sources).
     #[arg(long)]
     profiles: Option<PathBuf>,
+
+    // --- Governed startup inputs (RUST-MIGRATION-M0B) ---
+    // The node refuses to bind without a GOVERNED_EXECUTION startup receipt.
+    // Defaults resolve from the evidence/data base directory; the default
+    // platform is the build target OS.
+    /// Directory containing node-identity.json and capabilities.json.
+    #[arg(long)]
+    node_dir: Option<PathBuf>,
+
+    /// Path to governance-sync.json.
+    #[arg(long)]
+    governance_sync: Option<PathBuf>,
+
+    /// SQLite database path for the capability registry (canonical schema applied).
+    #[arg(long)]
+    capability_db: Option<PathBuf>,
+
+    /// Evidence output directory (startup receipt written here, append-only).
+    #[arg(long)]
+    evidence_dir: Option<PathBuf>,
+
+    /// Expected platform (defaults to the build target OS).
+    #[arg(long)]
+    platform: Option<String>,
+
+    /// Expected canonical governance commit (40-hex SHA).
+    #[arg(long)]
+    governance_commit: Option<String>,
 }
 
 #[tokio::main]
@@ -80,6 +108,48 @@ async fn main() {
         "Loaded {} profiles: {}",
         profile_manager.len(),
         profile_manager.aliases().join(", ")
+    );
+
+    // M0B — governed startup (RUST-MIGRATION-M0B, RUNTIME-API-CONTRACT-001):
+    // run the deterministic 6-phase startup protocol BEFORE any serving.
+    // Fail-closed: a non-GOVERNED_EXECUTION receipt exits the process pre-bind
+    // (RUST-M0B-3: no binding/serving before STARTUP_COMPLETE → SERVABLE_RUNTIME).
+    let startup_options = librarian_node::startup::resolve_options(
+        args.node_dir,
+        args.governance_sync,
+        args.capability_db,
+        args.evidence_dir,
+        args.platform,
+        args.governance_commit,
+        config.evidence_path.as_deref(),
+    );
+    let startup_outcome = match librarian_node::startup::run_node_startup(&startup_options) {
+        Ok(outcome) => outcome,
+        Err(e) => {
+            error!("FATAL: Governed startup failed: {:#}", e);
+            std::process::exit(1);
+        }
+    };
+    if startup_outcome.receipt.status != "GOVERNED_EXECUTION" {
+        error!(
+            "FATAL: Governed startup did not reach GOVERNED_EXECUTION ({}/{} checks passed, status {})",
+            startup_outcome.receipt.checks_passed,
+            startup_outcome.receipt.checks_passed + startup_outcome.receipt.checks_failed,
+            startup_outcome.receipt.status,
+        );
+        std::process::exit(1);
+    }
+    info!(
+        "Governed startup complete: receipt {} at governance commit {} ({}/{} checks)",
+        startup_outcome.receipt.receipt_id,
+        startup_outcome.receipt.governance_commit,
+        startup_outcome.receipt.checks_passed,
+        startup_outcome.receipt.checks_passed + startup_outcome.receipt.checks_failed,
+    );
+
+    // Seal the outcome for the runtime API (read-only projection, contract §2.4).
+    let runtime_api_state = std::sync::Arc::new(
+        librarian_node::runtime_api::RuntimeApiState::from_outcome(startup_outcome),
     );
 
     // Initialize operational database — fails closed on error
@@ -680,6 +750,11 @@ async fn main() {
 
     // Build router
     let app = build_router(state.clone());
+
+    // M0B — merge the runtime API (RUNTIME-API-CONTRACT-001) into the serving
+    // router as a module (no fork): read-only projections over the sealed
+    // startup outcome.
+    let app = app.merge(librarian_node::runtime_api::router(runtime_api_state));
 
     // Bind and serve
     let host = args.host.unwrap_or_else(|| config.router_host.clone());

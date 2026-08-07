@@ -1,6 +1,6 @@
 # RUST-MIGRATION-M0B — Runtime API Boundary
 
-**Status:** DRAFT (for owner review)
+**Status:** ACTIVE — contract LOCKED as Canonical (owner approval 2026-08-06); implementation COMPLETE, awaiting owner commit approval
 **Epic:** EPIC-RUST-MIGRATION-1
 **Phase:** 0B — Runtime API exposure of the validated startup engine
 **Predecessor:** `RUST-MIGRATION-M0A-COMPLETION.md` (SEALED, C2 Evidence Compatible, commit `0b9e85a`)
@@ -33,10 +33,10 @@ HTTP boundary (existing router, port 9130)
 
 - Node process startup: invoke `StartupEngine` before serving; hold the sealed `StartupOutcome` in memory
 - Enforce the state boundary: `STARTUP_COMPLETE` → `SERVABLE_RUNTIME`; the router binds/serves only after the transition
-- Runtime API endpoints over the existing router:
-  - `GET /health` — liveness (200 when runtime is up; reflects startup outcome)
-  - `GET /status` — node status (identity, state, uptime, last state change)
-  - `GET /receipt/latest` (or `/startup/receipt`) — the canonical startup receipt (RECEIPT-SCHEMA-001)
+- Runtime API endpoints over the existing router (names fixed by the locked contract):
+  - `GET /health` — governed-availability health (200 `ok` only in `SERVABLE_RUNTIME`; NOT process liveness)
+  - `GET /runtime/status` — governed availability status with provenance (node_id, runtime_state, startup_receipt_id, governance_commit, startup_status, checks, observed_at)
+  - `GET /runtime/receipt` — the canonical startup receipt (RECEIPT-SCHEMA-001), served exactly as sealed
 - Receipt served from memory (sealed at startup), NOT re-executed per request
 - Conformance: endpoint responses carry the same deterministic facts as the M0A evidence receipts
 - Exit behavior: process refuses to serve when startup fails (exit 1 before bind), consistent with probe semantics
@@ -48,22 +48,46 @@ HTTP boundary (existing router, port 9130)
 - Registry record-level reads (registry subsystem)
 - UI, agents, networking beyond the existing local router
 
-## Decisions Required (owner)
+## Contract Lock (owner-approved 2026-08-06)
 
-| Decision | Options | Recommendation |
-|----------|---------|----------------|
-| Endpoint naming | `/health`, `/status`, `/receipt/latest` vs alternatives | Fixed by `RUNTIME-API-CONTRACT-001.md` (created before implementation) |
-| Receipt history | In-memory latest only vs persistence to evidence dir | M0B: in-memory latest + evidence file already written by probe; history = M2+ custody chain |
+`contracts/runtime-api/RUNTIME-API-CONTRACT-001.md` — **Status: Canonical**, suite `RUNTIME-API-SCHEMA-001`. Refinements folded in at lock:
+
+1. **`RuntimeLifecycleState` is observational, not authoritative** — a contract type derived from runtime state; it does not authorize transitions; lifecycle transitions remain owned by the startup/runtime state machine (contract §2.4).
+2. **Surface manifest updated before implementation** — `RuntimeLifecycleState` added to the M0-0 contract surface manifest + drift guard (8/8 PASS) before any endpoint code.
+3. **`observed_at` is the only variable response field** — two status queries can differ only in observation metadata (contract §4.2).
+4. **`/health` = governed availability, not process liveness** — healthy only in `SERVABLE_RUNTIME` (contract §3.1). Implemented by removing the legacy weaker liveness handler from the ROUTER-RUST-HARDEN-1 router; backend liveness remains at `/backend/health`.
+5. **`/runtime/receipt` returns the receipt it observed** — no regeneration, transformation, or normalization; a regenerated receipt would create a second evidence event (contract §4.3).
+
+## Implementation status
+
+- `librarian-node/src/startup.rs` — node startup adapter (resolve inputs → engine → seal → evidence), shared by router and probe (no parallel path)
+- `librarian-node/src/runtime_api.rs` — `RuntimeApiState` (sealed, lifecycle derived), read-only handlers, router builder
+- `librarian-node/src/main.rs` — governed startup before bind (fail-closed exit 1), runtime API merged as a module
+- `librarian-node/src/bin/startup_probe.rs` — refactored onto the shared adapter (M0A CLI unchanged; 6/6 PASS regression)
+- `librarian-node/tests/m0b_runtime_api.rs` — 8/8 PASS
+- Live router run: `/health` 200 ok, `/runtime/status` 200 (receipt `WINDOWS-STARTUP-20260807-030256`, facts match M0A evidence), `/runtime/receipt` 200 (exact sealed receipt), POST → 405 `Allow: GET,HEAD`, unknown → 404
+- Evidence: `evidence/phase0/rust-core/m0b/` (README + 2 receipts)
+- Pre-existing, unchanged: 48 legacy `governance::*` failures + librarian-node test-target custody compile errors (verified at HEAD via stash; not M0B regressions)
+
+## Decisions Resolved (locked with contract, 2026-08-06)
+
+| Decision | Resolution |
+|----------|------------|
+| Endpoint naming | `/health`, `/runtime/status`, `/runtime/receipt` — fixed by `RUNTIME-API-CONTRACT-001.md` §3 |
+| Receipt history | In-memory latest (sealed) + evidence file written at startup; history = M2+ custody chain |
 
 ## Acceptance Gates
 
-| Gate | Scope | Verification |
-|------|-------|--------------|
-| RUST-M0-9 | M0B | Runtime API exposed: health/status/receipt query endpoints live on the existing router |
-| RUST-M0-10 | M0B | Node boundary serves the sealed M0A startup state (receipt + status) without re-executing the protocol; deterministic facts match the M0A evidence receipts |
-| RUST-M0B-1 | M0B | Process refuses to serve on startup failure (exit 1 pre-bind; consistent with M0A probe semantics) |
-| RUST-M0B-2 | M0B | API responses conform to canonical receipt contract (RECEIPT-SCHEMA-001) and `RUNTIME-API-CONTRACT-001.md` |
-| RUST-M0B-3 | M0B | State transition boundary enforced: `STARTUP_COMPLETE` → `SERVABLE_RUNTIME`; no serving before the transition; `/status` reports the boundary state |
+Owner-approved final gate list (supersedes RUST-M0-9/RUST-M0-10, which are absorbed as follows: API exposure → M0B-1/M0B-4; serving sealed state without re-execution → M0B-2/M0B-5/M0B-6).
+
+| Gate | Verification |
+|------|--------------|
+| RUST-M0B-1 | Runtime API contract implemented (`contracts/runtime-api/RUNTIME-API-CONTRACT-001.md`, suite `RUNTIME-API-SCHEMA-001`) |
+| RUST-M0B-2 | Read-only runtime projections: health/status/receipt handlers read sealed `StartupOutcome`; no write path |
+| RUST-M0B-3 | `STARTUP_COMPLETE → SERVABLE_RUNTIME` enforced: no binding/serving before the transition; `STARTUP_FAILED` exits pre-bind |
+| RUST-M0B-4 | API responses conform to the runtime contract (provenance fields, deterministic facts match M0A evidence receipts, `/health` = governed-availability health, receipt served unmodified) |
+| RUST-M0B-5 | No startup execution through the API: no request path invokes the startup engine; lifecycle transitions are not API-reachable |
+| RUST-M0B-6 | Evidence-backed validation: responses carry the observed receipt/status (no regenerated evidence events); validated by integration tests + evidence transcripts |
 
 Conformance target: **C2 (Evidence Compatible)** — same level as M0A; C3/C4 not claimed.
 

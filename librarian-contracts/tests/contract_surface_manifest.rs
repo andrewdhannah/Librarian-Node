@@ -13,8 +13,10 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use librarian_contracts::node::startup::{is_sha256_hex, StartupCheck, StartupPhase, StartupStatus};
-use librarian_contracts::node::{StartupReceipt, StartupReceiptFacts};
+use librarian_contracts::node::startup::{
+    is_sha256_hex, RuntimeLifecycleState, StartupCheck, StartupPhase, StartupStatus,
+};
+use librarian_contracts::node::StartupReceipt;
 use sha2::{Digest, Sha256};
 
 const MANIFEST_REL: &str = "../conformance/contract-surface/contract-surface-manifest.json";
@@ -61,8 +63,14 @@ fn manifest_exists_and_is_well_formed() {
     let manifest = load_manifest();
     assert_eq!(manifest["manifest_id"], "CONTRACT-SURFACE-MANIFEST-001");
     let types = manifest["types"].as_object().expect("types object");
-    for name in ["StartupReceipt", "StartupReceiptFacts", "StartupPhase", "StartupStatus", "StartupCheck"]
-    {
+    for name in [
+        "StartupReceipt",
+        "StartupReceiptFacts",
+        "StartupPhase",
+        "StartupStatus",
+        "StartupCheck",
+        "RuntimeLifecycleState",
+    ] {
         assert!(types.contains_key(name), "manifest must declare type {name}");
     }
 }
@@ -171,6 +179,34 @@ fn startup_receipt_facts_surface_matches_manifest() {
     let actual: BTreeSet<String> = json.as_object().expect("object").keys().cloned().collect();
     assert_eq!(actual.len(), 11, "equivalence surface must have exactly 11 fields");
     assert_eq!(actual, expected, "StartupReceiptFacts surface drifted from the manifest");
+}
+
+#[test]
+fn runtime_lifecycle_state_surface_matches_manifest() {
+    let manifest = load_manifest();
+    let expected: Vec<String> = manifest["types"]["RuntimeLifecycleState"]["variants"]
+        .as_array()
+        .expect("variants array")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let actual: Vec<String> = RuntimeLifecycleState::ALL
+        .iter()
+        .map(|s| s.as_str().to_string())
+        .collect();
+    assert_eq!(
+        actual, expected,
+        "RuntimeLifecycleState variants drifted from the manifest"
+    );
+
+    // Observational constraint: all variants must round-trip through serde
+    // without authorizing anything (contract §2.4).
+    for name in &expected {
+        let value: RuntimeLifecycleState =
+            serde_json::from_str(&format!("\"{name}\"")).expect("deserialize RuntimeLifecycleState");
+        assert_eq!(value.as_str(), name);
+    }
 }
 
 #[test]

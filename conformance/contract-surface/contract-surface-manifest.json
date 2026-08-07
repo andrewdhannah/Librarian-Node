@@ -85,6 +85,13 @@
         "passed": { "serde_name": "passed", "type": "bool" },
         "detail": { "serde_name": "detail", "type": "String" }
       }
+    },
+    "RuntimeLifecycleState": {
+      "kind": "enum",
+      "serialized": true,
+      "strategy": "rename_all = SCREAMING_SNAKE_CASE",
+      "variants": ["INITIALIZING", "STARTUP_COMPLETE", "SERVABLE_RUNTIME", "STARTUP_FAILED"],
+      "note": "observational contract representation derived from runtime state (RUNTIME-API-CONTRACT-001 §2.4); does NOT authorize transitions — lifecycle transitions remain owned by the startup/runtime state machine; added to the surface via M0B re-baseline (RUNTIME-API-SCHEMA-001)"
     }
   },
   "fixture_hashes": {
@@ -95,7 +102,7 @@
   "source_hashes": {
     "librarian-core/assets/schema/capability-registry-schema.sql": "083e914ba95dd9c1094f69ad0812aa6dd419b817ec938fa23b0fe96d07e65c20",
     "librarian-core/assets/schema/capability-registry-schema-phase3.sql": "03e7d17b4481041962b905f56681fbf8a8397113d8cef3a0f8c0f0802128014d",
-    "librarian-contracts/src/node/startup.rs": "f3ef26df13c97742a16ad388824caeb0e155bee7272cd5bc30e7f8c417baffa4",
-    "librarian-contracts/src/node/mod.rs": "f17a91767624a045c70139f56e6cc3692ca7dc5f2999bc0503afef445de306ae"
+    "librarian-contracts/src/node/startup.rs": "c139e14e84970470adcd4c506065160a344e59bc75516d69c492485958210b22",
+    "librarian-contracts/src/node/mod.rs": "ff6b34dcb3307ff7d872e78830058c406a8454b7b574f7339696503f18f6df68"
   }
 }

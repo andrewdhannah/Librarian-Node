@@ -9,5 +9,7 @@ pub use capabilities::{Capability, CapabilityManifest, ModelDescriptor};
 pub use hardware::HardwareProfile;
 pub use identity::{NodeIdentity, NodeStatus};
 pub use registration::{NodeRecord, RegistrationReceipt, RegistrationRequest};
-pub use startup::{StartupCheck, StartupPhase, StartupReceipt, StartupReceiptFacts, StartupStatus};
+pub use startup::{
+    RuntimeLifecycleState, StartupCheck, StartupPhase, StartupReceipt, StartupReceiptFacts, StartupStatus,
+};
 pub use state::NodeState;

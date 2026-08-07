@@ -4,19 +4,19 @@
 //! ROUTER-RUST-HARDEN-1): the first production runtime artifact must not be
 //! coupled to HTTP/service concerns (RUST-MIGRATION-M0A work order, §Scope).
 //!
-//! Behavior: load runtime node directory + governance sync → invoke the
-//! core `StartupEngine` → emit the canonical startup receipt into the
-//! evidence directory → exit 0 on GOVERNED_EXECUTION, 1 otherwise.
+//! Behavior: resolve the runtime node directory + governance sync → invoke the
+//! core `StartupEngine` (via the shared `librarian_node::startup` adapter) →
+//! emit the canonical startup receipt into the evidence directory → exit 0 on
+//! GOVERNED_EXECUTION, 1 otherwise.
+//!
+//! Since M0B the probe shares its startup path with the router
+//! (`librarian_node::startup::run_node_startup`) — no parallel implementation.
 
 use std::path::PathBuf;
 
 use anyhow::{Context, Result, bail};
 use clap::Parser;
-use librarian_core::startup::{
-    canonical_schema, CapabilitiesFile, DatabaseContext, GovernanceSync, NodeIdentityFile,
-    StartupContext, StartupEngine,
-};
-use serde::de::DeserializeOwned;
+use librarian_node::startup::{NodeStartupOptions, run_node_startup};
 
 #[derive(Parser)]
 #[command(
@@ -53,37 +53,16 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    let identity: NodeIdentityFile = read_json(&args.node_dir.join("node-identity.json"))
-        .with_context(|| format!("load {}", args.node_dir.join("node-identity.json").display()))?;
-    let capabilities: CapabilitiesFile = read_json(&args.node_dir.join("capabilities.json"))
-        .with_context(|| format!("load {}", args.node_dir.join("capabilities.json").display()))?;
-    let governance: GovernanceSync = read_json(&args.governance_sync)
-        .with_context(|| format!("load {}", args.governance_sync.display()))?;
-
-    let context = StartupContext {
-        identity,
-        governance,
-        capabilities,
-        expected_platform: args.platform,
-        expected_governance_commit: args.governance_commit,
-        database: DatabaseContext {
-            path: args.db_path,
-            schema_sql: canonical_schema(),
-        },
-    };
-
-    let outcome = StartupEngine::run(&context)?;
+    let outcome = run_node_startup(&NodeStartupOptions {
+        node_dir: args.node_dir,
+        governance_sync: args.governance_sync,
+        capability_db: args.db_path,
+        evidence_dir: args.evidence_dir,
+        platform: args.platform,
+        governance_commit: args.governance_commit,
+    })
+    .context("run node startup protocol")?;
     let receipt = &outcome.receipt;
-
-    // Evidence emission (append-only; millisecond component keeps filenames
-    // unique even for same-second runs, since receipt_id is second-precision).
-    std::fs::create_dir_all(&args.evidence_dir).context("create evidence dir")?;
-    let stamp = chrono::Utc::now().format("%Y%m%d-%H%M%S-%3f");
-    let evidence_path = args
-        .evidence_dir
-        .join(format!("startup-receipt-{stamp}.json"));
-    let json = serde_json::to_string_pretty(receipt).context("serialize receipt")?;
-    std::fs::write(&evidence_path, json).context("write receipt evidence")?;
 
     println!("=== M0A startup protocol (RUST-MIGRATION-M0A) ===");
     for check in &outcome.checks {
@@ -96,21 +75,13 @@ fn main() -> Result<()> {
     );
     println!("status: {}", receipt.status);
     println!("receipt_id: {}", receipt.receipt_id);
-    println!("receipt: {}", evidence_path.display());
 
     if receipt.status == "GOVERNED_EXECUTION" {
         Ok(())
     } else {
         bail!(
-            "startup failed: {} checks failed (see {}", 
-            receipt.checks_failed,
-            evidence_path.display()
+            "startup failed: {} checks failed",
+            receipt.checks_failed
         )
     }
-}
-
-/// Load and parse a JSON file into a DeserializeOwned target.
-fn read_json<T: DeserializeOwned>(path: &std::path::Path) -> Result<T> {
-    let text = std::fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    serde_json::from_str(&text).with_context(|| format!("parse {}", path.display()))
 }

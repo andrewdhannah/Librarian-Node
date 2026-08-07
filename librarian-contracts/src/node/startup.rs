@@ -151,6 +151,51 @@ pub struct StartupCheck {
     pub detail: String,
 }
 
+/// Observational runtime lifecycle state (`RUNTIME-API-CONTRACT-001` §2).
+///
+/// This is an **observational contract representation derived from runtime
+/// state. It does not authorize transitions. Lifecycle transitions remain
+/// owned by the startup/runtime state machine.** The runtime API may read this
+/// state; it MUST NOT write it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum RuntimeLifecycleState {
+    /// Node process started; the 6-phase startup protocol is executing.
+    Initializing,
+    /// All startup checks passed; receipt sealed (transitional, pre-bind).
+    StartupComplete,
+    /// Node available to consumers: startup succeeded ∧ receipt exists ∧
+    /// governance valid ∧ runtime state observable.
+    ServableRuntime,
+    /// One or more startup checks failed; process exits pre-bind.
+    StartupFailed,
+}
+
+impl RuntimeLifecycleState {
+    /// All lifecycle states, in transition order.
+    pub const ALL: [RuntimeLifecycleState; 4] = [
+        RuntimeLifecycleState::Initializing,
+        RuntimeLifecycleState::StartupComplete,
+        RuntimeLifecycleState::ServableRuntime,
+        RuntimeLifecycleState::StartupFailed,
+    ];
+
+    /// Serialized form (matches `serde(rename_all = "SCREAMING_SNAKE_CASE")`).
+    pub fn as_str(self) -> &'static str {
+        match self {
+            RuntimeLifecycleState::Initializing => "INITIALIZING",
+            RuntimeLifecycleState::StartupComplete => "STARTUP_COMPLETE",
+            RuntimeLifecycleState::ServableRuntime => "SERVABLE_RUNTIME",
+            RuntimeLifecycleState::StartupFailed => "STARTUP_FAILED",
+        }
+    }
+
+    /// Whether this state is observable through the runtime API.
+    pub fn is_servable(self) -> bool {
+        matches!(self, RuntimeLifecycleState::ServableRuntime)
+    }
+}
+
 impl StartupReceipt {
     /// Extract the deterministic equivalence facts.
     pub fn deterministic_facts(&self) -> StartupReceiptFacts {
@@ -371,5 +416,29 @@ mod tests {
         let json = serde_json::to_string(&check).unwrap();
         let back: StartupCheck = serde_json::from_str(&json).unwrap();
         assert_eq!(check, back);
+    }
+
+    #[test]
+    fn test_runtime_lifecycle_state_serde_matches_as_str() {
+        // Observational contract representation (RUNTIME-API-CONTRACT-001 §2.4):
+        // wire values are SCREAMING_SNAKE_CASE and must match as_str().
+        for state in RuntimeLifecycleState::ALL {
+            let json = serde_json::to_string(&state).unwrap();
+            assert_eq!(json, format!("\"{}\"", state.as_str()));
+            let back: RuntimeLifecycleState = serde_json::from_str(&json).unwrap();
+            assert_eq!(back, state);
+        }
+    }
+
+    #[test]
+    fn test_runtime_lifecycle_state_servable_semantics() {
+        assert!(RuntimeLifecycleState::ServableRuntime.is_servable());
+        for state in [
+            RuntimeLifecycleState::Initializing,
+            RuntimeLifecycleState::StartupComplete,
+            RuntimeLifecycleState::StartupFailed,
+        ] {
+            assert!(!state.is_servable(), "{} must not be servable", state.as_str());
+        }
     }
 }

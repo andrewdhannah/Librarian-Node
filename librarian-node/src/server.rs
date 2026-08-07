@@ -329,41 +329,6 @@ async fn handle_health(State(state): State<Arc<AppState>>) -> Json<Value> {
 }
 
 // ============================================================================
-// GET /health (legacy)
-// ============================================================================
-
-async fn handle_health_legacy(State(state): State<Arc<AppState>>) -> Json<Value> {
-    // Get backend aliases without holding the lock across await
-    let aliases: Vec<String> = {
-        let backends = state.backends.lock().await;
-        backends.keys().cloned().collect()
-    };
-
-    // Check each backend with brief health poll
-    let mut active: Option<String> = None;
-    for alias in &aliases {
-        let bp = {
-            let backends = state.backends.lock().await;
-            backends.get(alias).cloned()
-        };
-        if let Some(bp) = bp {
-            if bp.check_health().await && bp.get_state().await.is_healthy() {
-                active = Some(alias.clone());
-                break;
-            }
-        }
-    }
-
-    let response = json!({
-        "status": if active.is_some() { "ok" } else { "degraded" },
-        "router": "ok",
-        "active_profile": active,
-        "authority": "advisory_only",
-    });
-    Json(response)
-}
-
-// ============================================================================
 // POST /backend/select
 // ============================================================================
 
@@ -3686,7 +3651,6 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/backend/status", get(handle_status))
         .route("/backend/profiles", get(handle_profiles))
         .route("/backend/health", get(handle_health))
-        .route("/health", get(handle_health_legacy))
         .route("/backend/select", post(handle_select))
         .route("/backend/stop", post(handle_stop))
         .route("/backend/restart", post(handle_restart))
