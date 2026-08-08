@@ -2,6 +2,7 @@ pub mod capabilities;
 pub mod capability_registry;
 pub mod hardware;
 pub mod identity;
+pub mod qualification_semantics;
 pub mod registration;
 pub mod registry_observation;
 pub mod startup;
@@ -18,6 +19,12 @@ pub use capability_registry::{
 };
 pub use hardware::HardwareProfile;
 pub use identity::{NodeIdentity, NodeStatus};
+pub use qualification_semantics::{
+    CapabilityGovernanceState, EvidenceCompleteness, EvidenceFreshnessStatus,
+    ForbiddenTransition, QualificationProfile, QualificationValidationError,
+    QualificationValidationResult, TransitionAuthority, TransitionAuthorityRequirement,
+    TransitionResult, ValidTransition,
+};
 pub use registration::{NodeRecord, RegistrationReceipt, RegistrationRequest};
 pub use registry_observation::{
     AuthorityAxis, AvailabilityAxis, CapabilityObservation, CapabilityTypeDefinition,
