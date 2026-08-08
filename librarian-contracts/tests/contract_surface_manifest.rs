@@ -824,5 +824,5 @@ fn fixture_and_source_hashes_match_manifest() {
         );
         verified += 1;
     }
-    assert_eq!(verified, 11, "manifest must pin 3 fixtures + 8 sources");
+    assert_eq!(verified, 16, "manifest must pin 3 fixtures + 13 sources");
 }

@@ -2,8 +2,8 @@
   "manifest_id": "CONTRACT-SURFACE-MANIFEST-001",
   "manifest_version": "1.0.0",
   "created": "2026-08-06T22:24:54Z",
-  "last_rebaseline": "2026-08-07 (M1-C0: adapter contract surface locked — REGISTRY-OBSERVATION-ADAPTER-CONTRACT-001 added under existing suite REGISTRY-OBSERVATION-SCHEMA-001; MCP tool definitions, HTTP route definitions, error codes, transport identity separation rules)",
-  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState), M1-0 (capability contract set), M1-A (capability registry implementation types), M1-B-0 (runtime registry projection adapter), M1-B (registry observation projection types), and M1-C0 (adapter contract surface). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
+  "last_rebaseline": "2026-08-07 (M1-D0: qualification semantics contracts locked — 4 qualification contracts added under QUALIFICATION-SCHEMA-001; transition, evidence, authority, availability boundary)",
+  "description": "Contract surface lock (RUST-M0-0) for the M0A startup engine; re-baselined for M0B (RuntimeLifecycleState), M1-0 (capability contract set), M1-A (capability registry implementation types), M1-B-0 (runtime registry projection adapter), M1-B (registry observation projection types), M1-C0 (adapter contract surface), and M1-D0 (qualification semantics contracts). Snapshot of the librarian-contracts interop surface at implementation start; drift against this manifest fails the guard test (librarian-contracts/tests/contract_surface_manifest.rs).",
   "source": {
     "repository": "github.com/andrewdhannah/Librarian-Node",
     "librarian_contracts_head": "f5959d310e010d7e9e7f97aad1f38ac369109086",
@@ -29,6 +29,11 @@
     "contracts/capability/OPERATIONAL-MODE-DERIVATION-CONTRACT-001.md",
     "contracts/runtime-api/RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001.md",
     "contracts/capability/REGISTRY-OBSERVATION-ADAPTER-CONTRACT-001.md",
+    "contracts/capability/QUALIFICATION-TRANSITION-CONTRACT-001.md",
+    "contracts/capability/QUALIFICATION-EVIDENCE-CONTRACT-001.md",
+    "contracts/capability/QUALIFICATION-AUTHORITY-CONTRACT-001.md",
+    "contracts/capability/QUALIFICATION-AVAILABILITY-BOUNDARY-CONTRACT-001.md",
+    "contracts/capability/M1-D0-QUALIFICATION-SEMANTICS-LOCK.md",
     "schemas/startup-receipt.schema.json"
   ],
   "serialization": {
@@ -471,6 +476,11 @@
     "librarian-contracts/src/node/capability_registry.rs": "be0e8bc7dc8ea9e67fd8a4909d44cb1116bd50b3edadb1f829e10bc942d64d42",
     "librarian-contracts/src/node/registry_observation.rs": "c261ab523cef2f9cd4de9b91032ee186e3bbd1dd347ff0c444743ad9676ef226",
     "contracts/runtime-api/RUNTIME-REGISTRY-OBSERVATION-CONTRACT-001.md": "47dbb7ca8b3786fbc5edd83006a958aac9ebfccb81d04b6ef5ad2afe63dbc380",
-    "contracts/capability/REGISTRY-OBSERVATION-ADAPTER-CONTRACT-001.md": "1cc0364b86d6a74c3bc846b1f2943d7ff0c42996d8f069f27b4573ebd74cd323"
+    "contracts/capability/REGISTRY-OBSERVATION-ADAPTER-CONTRACT-001.md": "1cc0364b86d6a74c3bc846b1f2943d7ff0c42996d8f069f27b4573ebd74cd323",
+    "contracts/capability/QUALIFICATION-TRANSITION-CONTRACT-001.md": "7f018b577550a7c1afb7e8405a19a96ebce4459fdcea28adbde18a0363f9bc33",
+    "contracts/capability/QUALIFICATION-EVIDENCE-CONTRACT-001.md": "c8c8ae4acfa8640b04f72a2c570800183a8633c16e46e0e7339d29e6108cddc0",
+    "contracts/capability/QUALIFICATION-AUTHORITY-CONTRACT-001.md": "b73ba9c5380cb1dbbb8f61aa2115ab1114c49925b91413691541bec4b9053c90",
+    "contracts/capability/QUALIFICATION-AVAILABILITY-BOUNDARY-CONTRACT-001.md": "8ac5ad73713a09d7b48609233b8bed0dbcd7f2e74f64f23156b978752087a380",
+    "contracts/capability/M1-D0-QUALIFICATION-SEMANTICS-LOCK.md": "a7bfe56a87c7045bba2671c4e8392901b3635c7be2d9f0f128a2150cc56aa1d4"
   }
 }
