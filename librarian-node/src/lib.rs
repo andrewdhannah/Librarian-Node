@@ -6,6 +6,7 @@ pub mod node;
 pub mod operator;
 pub mod platform;
 pub mod process;
+pub mod qualification_observation;
 pub mod refusal;
 pub mod registry_observation;
 pub mod residency;
