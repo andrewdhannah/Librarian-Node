@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://librarian.softwareconductor.com/schemas/mcp-error-v1",
+  "title": "MCP Error Envelope",
+  "description": "JSON-RPC 2.0 error response envelope for the Model Context Protocol. Standard error codes for the MCP capability boundary.",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "enum": ["2.0"],
+      "description": "JSON-RPC protocol version — always '2.0'"
+    },
+    "id": {
+      "type": ["string", "number", "null"],
+      "description": "Echo of the request identifier, or null for notification errors"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "JSON-RPC error code",
+          "enum": [-32600, -32601, -32602, -32603]
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message"
+        }
+      },
+      "required": ["code", "message"]
+    }
+  },
+  "required": ["jsonrpc", "error"],
+  "examples": [
+    {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "error": {
+        "code": -32602,
+        "message": "Invalid params: capability_registry_load: capability_id must not be empty"
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": "2",
+      "error": {
+        "code": -32601,
+        "message": "Method not found"
+      }
+    }
+  ]
+}

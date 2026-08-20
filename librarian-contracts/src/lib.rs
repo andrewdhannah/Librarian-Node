@@ -18,6 +18,10 @@
 //! - `capabilities` — Capability declarations
 //! - `errors` — Contract-level error types
 //! - `serialization` — Deterministic serialization utilities
+//! - `capability_registry` — Capability Registry MCP contracts
+//!   (search, list, resolve, load, import, evidence queries)
+//! - `platform_qualification` — Qualification certificates and
+//!   contract identity for platform specification conformance
 
 pub mod identity;
 pub mod lifecycle;
@@ -28,6 +32,8 @@ pub mod custody;
 pub mod capabilities;
 pub mod errors;
 pub mod serialization;
+pub mod capability_registry;
+pub mod platform_qualification;
 
 pub mod prelude {
     pub use crate::identity::*;
@@ -39,4 +45,6 @@ pub mod prelude {
     pub use crate::capabilities::*;
     pub use crate::errors::*;
     pub use crate::serialization::*;
+    pub use crate::capability_registry::*;
+    pub use crate::platform_qualification::*;
 }

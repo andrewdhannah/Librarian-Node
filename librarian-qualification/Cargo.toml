@@ -1,0 +1,15 @@
+[package]
+name = "librarian-qualification"
+version = "0.1.0"
+edition = "2021"
+description = "Platform contract qualification harness for the Librarian. Tests structural, representational, behavioral, deterministic, and evolutionary conformance to the Librarian Platform Specification."
+
+[dependencies]
+librarian-contracts = { path = "../librarian-contracts" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+chrono = { workspace = true }
+jsonschema = "0.18"
+
+[dev-dependencies]

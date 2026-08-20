@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://librarian.softwareconductor.com/schemas/mcp-response-v1",
+  "title": "MCP Response Envelope",
+  "description": "JSON-RPC 2.0 success response envelope for the Model Context Protocol. Wraps tool-specific results in a content array suitable for MCP clients.",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "enum": ["2.0"],
+      "description": "JSON-RPC protocol version — always '2.0'"
+    },
+    "id": {
+      "type": ["string", "number", "null"],
+      "description": "Echo of the request identifier"
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["text"],
+                "description": "Content type — currently only 'text' is supported"
+              },
+              "text": {
+                "type": "string",
+                "description": "JSON-encoded tool result as a string. The client must parse this to access structured data."
+              }
+            },
+            "required": ["type", "text"]
+          },
+          "description": "MCP content items — typically one text item containing the JSON result"
+        }
+      },
+      "required": ["content"]
+    }
+  },
+  "required": ["jsonrpc", "id", "result"],
+  "examples": [
+    {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"schema\":\"capability-registry-search-response-v1\",\"total_results\":1,\"results\":[{\"id\":\"frontend-design\",\"name\":\"Frontend Design\",\"type\":\"skill\",\"status\":\"qualified\",\"active_version\":3}]}"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://librarian.softwareconductor.com/schemas/mcp-request-v1",
+  "title": "MCP Request Envelope",
+  "description": "JSON-RPC 2.0 request envelope for the Model Context Protocol. Used for all MCP tool invocations including capability registry operations.",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "enum": ["2.0"],
+      "description": "JSON-RPC protocol version — always '2.0'"
+    },
+    "id": {
+      "type": ["string", "number", "null"],
+      "description": "Request identifier echoed in response. Normalized to string by the server."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["tools/list", "tools/call"],
+      "description": "MCP method — 'tools/list' to enumerate tools, 'tools/call' to invoke a tool"
+    },
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Tool name (required for tools/call, omitted for tools/list)"
+        },
+        "arguments": {
+          "type": "object",
+          "description": "Tool-specific arguments as key-value pairs. Values may be strings, numbers, booleans, arrays, objects, or null.",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "array" },
+              { "type": "object" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "required": [],
+      "description": "Method parameters. For tools/call, 'name' and 'arguments' are required."
+    }
+  },
+  "required": ["jsonrpc", "method"],
+  "examples": [
+    {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "method": "tools/list"
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": "2",
+      "method": "tools/call",
+      "params": {
+        "name": "capability_registry_search",
+        "arguments": {
+          "query": "frontend design",
+          "type": "skill"
+        }
+      }
+    }
+  ]
+}

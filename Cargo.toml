@@ -3,6 +3,7 @@ members = [
     "librarian-contracts",
     "librarian-core",
     "librarian-node",
+    "librarian-qualification",
 ]
 
 resolver = "2"
