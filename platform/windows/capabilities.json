@@ -1,0 +1,9 @@
+{
+  "governance_read": true,
+  "governance_verify": true,
+  "execution_allowed": true,
+  "evidence_generation": true,
+  "custody_tracking": true,
+  "receipt_validation": true,
+  "governance_write": false
+}

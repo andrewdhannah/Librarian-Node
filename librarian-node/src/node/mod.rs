@@ -31,6 +31,7 @@ pub mod registry_apply_service;
 pub mod registry_candidate_service;
 pub mod registry_enforcement_service;
 pub mod registry_mcp_service;
+pub mod registry_observation_mcp;
 pub mod registry_owner_service;
 
 pub use allocation_service::AllocationService;

@@ -215,6 +215,14 @@ async fn setup_app(config: RouterConfig) -> (Arc<AppState>, NamedTempFile, tempf
         registry_mcp_service: tokio::sync::Mutex::new(
             librarian_node::node::RegistryMcpService::new(dir("test-registry-mcp.json")),
         ),
+        registry_observation_state: std::sync::Arc::new(
+            librarian_node::registry_observation::RegistryObservationState::new(
+                "test-node",
+                &librarian_node::startup::resolve_options(
+                    None, None, None, None, None, None, None,
+                ).capability_db,
+            ),
+        ),
         registry_owner_service: tokio::sync::Mutex::new(
             librarian_node::node::RegistryOwnerService::new(dir("test-registry-owner.json")),
         ),

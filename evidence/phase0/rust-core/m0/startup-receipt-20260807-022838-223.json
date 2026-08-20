@@ -1,0 +1,15 @@
+{
+  "receipt_id": "WINDOWS-STARTUP-20260807-022838",
+  "node_id": "WINPC-BIG-PICKLE",
+  "platform": "windows",
+  "governance_commit": "6be76216a8048492526c4ca0ae751b6d2d507185",
+  "startup_phase": "complete",
+  "identity_loaded": true,
+  "governance_verified": true,
+  "capabilities_loaded": true,
+  "environment_validated": true,
+  "checks_passed": 6,
+  "checks_failed": 0,
+  "status": "GOVERNED_EXECUTION",
+  "timestamp": "2026-08-07T02:28:38Z"
+}

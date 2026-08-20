@@ -1,0 +1,17 @@
+{
+  "node_type": "librarian-runtime-node",
+  "node_id": "LINUX-NODE-INITIAL",
+  "authority": "owner-controlled",
+  "platform": "linux",
+  "governance_commit": "6be76216a8048492526c4ca0ae751b6d2d507185",
+  "state": "GOVERNED_EXECUTION",
+  "capabilities": [
+    "governance_read",
+    "governance_verify",
+    "execution_allowed",
+    "evidence_generation",
+    "custody_tracking",
+    "receipt_validation"
+  ],
+  "created_at": "2026-07-24T22:18:00.0000000Z"
+}

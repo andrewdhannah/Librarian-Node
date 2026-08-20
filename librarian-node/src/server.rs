@@ -27,6 +27,7 @@ use crate::node::{
     RegistryOwnerService, RegistrationService, SessionService, WorkloadLifecycleService,
     WorkloadSessionService, require_active_session,
 };
+use crate::registry_observation::RegistryObservationState;
 use crate::process::{BackendProcess, BackendState};
 use crate::refusal;
 use crate::residency::ModelResidencySupervisor;
@@ -142,6 +143,8 @@ pub struct AppState {
     pub model_runtime_service: tokio::sync::Mutex<ModelRuntimeService>,
     /// Registry MCP service — MCP tool catalog and execution for registry operations
     pub registry_mcp_service: tokio::sync::Mutex<RegistryMcpService>,
+    /// Registry observation state — governed projection module for registry observation
+    pub registry_observation_state: Arc<RegistryObservationState>,
     /// Registry owner service — owner action lifecycle for registry state changes
     pub registry_owner_service: tokio::sync::Mutex<RegistryOwnerService>,
     /// Registry apply service — apply boundary state machine for registry operations
@@ -325,41 +328,6 @@ async fn handle_health(State(state): State<Arc<AppState>>) -> Json<Value> {
         "authority": "advisory_only",
     });
     state.evidence_writer.write("health.json", &response);
-    Json(response)
-}
-
-// ============================================================================
-// GET /health (legacy)
-// ============================================================================
-
-async fn handle_health_legacy(State(state): State<Arc<AppState>>) -> Json<Value> {
-    // Get backend aliases without holding the lock across await
-    let aliases: Vec<String> = {
-        let backends = state.backends.lock().await;
-        backends.keys().cloned().collect()
-    };
-
-    // Check each backend with brief health poll
-    let mut active: Option<String> = None;
-    for alias in &aliases {
-        let bp = {
-            let backends = state.backends.lock().await;
-            backends.get(alias).cloned()
-        };
-        if let Some(bp) = bp {
-            if bp.check_health().await && bp.get_state().await.is_healthy() {
-                active = Some(alias.clone());
-                break;
-            }
-        }
-    }
-
-    let response = json!({
-        "status": if active.is_some() { "ok" } else { "degraded" },
-        "router": "ok",
-        "active_profile": active,
-        "authority": "advisory_only",
-    });
     Json(response)
 }
 
@@ -3288,16 +3256,32 @@ async fn handle_registry_candidate_expire(
 // ============================================================================
 
 /// GET /registry/mcp/catalog — returns the full MCP tool catalog
+/// (legacy tools + observation tools from the governed projection boundary)
 async fn handle_registry_mcp_catalog(State(state): State<Arc<AppState>>) -> Json<librarian_contracts::registry_mcp::McpToolCatalog> {
     let mcp = state.registry_mcp_service.lock().await;
-    Json(mcp.get_tool_catalog())
+    let mut catalog = mcp.get_tool_catalog();
+    // Append observation tools from the governed projection boundary
+    let mut observation_tools = crate::node::registry_observation_mcp::define_observation_tools();
+    catalog.tools.append(&mut observation_tools);
+    Json(catalog)
 }
 
 /// POST /registry/mcp/execute — execute an MCP tool request
+/// (dispatches to legacy tools or observation tools based on tool name)
 async fn handle_registry_mcp_execute(
     State(state): State<Arc<AppState>>,
     axum::Json(body): axum::Json<librarian_contracts::registry_mcp::McpToolRequest>,
 ) -> (StatusCode, Json<librarian_contracts::registry_mcp::McpToolResponse>) {
+    // Observation tools are dispatched to the governed projection boundary
+    if body.tool_name.starts_with("registry.observe_") {
+        let response = crate::node::registry_observation_mcp::execute_observation_tool(
+            body,
+            &state.registry_observation_state,
+        );
+        return (StatusCode::OK, Json(response));
+    }
+
+    // Legacy tools dispatched through the existing MCP service
     let mut mcp = state.registry_mcp_service.lock().await;
     let candidates = state.registry_candidate_service.lock().await;
     let identity = state.node_identity_service.clone();
@@ -3677,6 +3661,115 @@ async fn handle_registry_apply_history(
 }
 
 // ============================================================================
+// Registry Observation HTTP Adapters (M1-C2)
+// ============================================================================
+
+/// GET /registry/observe/capabilities — observe capability types through the governed projection boundary
+async fn handle_observe_capabilities(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_types() {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/capabilities/{id} — observe a single capability through the governed projection boundary
+async fn handle_observe_capability(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(capability_id): axum::extract::Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability(&capability_id) {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/versions/{id} — observe capability versions through the governed projection boundary
+async fn handle_observe_versions(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(capability_id): axum::extract::Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_versions(&capability_id) {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/dependencies/{id} — observe capability dependencies through the governed projection boundary
+async fn handle_observe_dependencies(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(capability_id): axum::extract::Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_dependencies(&capability_id) {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/types — observe capability type taxonomy through the governed projection boundary
+async fn handle_observe_types(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.capability_types() {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// GET /registry/observe/overview — observe registry overview counts through the governed projection boundary
+async fn handle_observe_overview(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    match state.registry_observation_state.registry_overview() {
+        Ok(envelope) => {
+            let json = serde_json::to_value(&envelope).expect("serialize projection envelope");
+            (StatusCode::OK, Json(json))
+        }
+        Err(e) => observation_error_response(e),
+    }
+}
+
+/// Map projection errors to stable HTTP error responses.
+///
+/// Error metadata does not contain transport identity, internal storage paths,
+/// or SQL query text. HTTP connection identity is NOT injected into error responses.
+fn observation_error_response(e: anyhow::Error) -> (StatusCode, Json<serde_json::Value>) {
+    let error_msg = e.to_string();
+    let (code, message, status) = if error_msg.contains("registry identity fail-closed") {
+        ("REGISTRY_IDENTITY_UNAVAILABLE", error_msg, StatusCode::SERVICE_UNAVAILABLE)
+    } else if error_msg.contains("fail-closed invariant violation") {
+        ("INVARIANT_VIOLATION", error_msg, StatusCode::INTERNAL_SERVER_ERROR)
+    } else if error_msg.contains("not found in registry") {
+        ("CAPABILITY_NOT_FOUND", error_msg, StatusCode::NOT_FOUND)
+    } else if error_msg.contains("no such table") || error_msg.contains("cannot read") {
+        ("REGISTRY_NOT_INITIALIZED", error_msg, StatusCode::SERVICE_UNAVAILABLE)
+    } else {
+        ("PROJECTION_SNAPSHOT_FAILED", error_msg, StatusCode::INTERNAL_SERVER_ERROR)
+    };
+
+    (status, Json(serde_json::json!({
+        "code": code,
+        "message": message
+    })))
+}
+
+// ============================================================================
 // Router construction
 // ============================================================================
 
@@ -3686,7 +3779,6 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/backend/status", get(handle_status))
         .route("/backend/profiles", get(handle_profiles))
         .route("/backend/health", get(handle_health))
-        .route("/health", get(handle_health_legacy))
         .route("/backend/select", post(handle_select))
         .route("/backend/stop", post(handle_stop))
         .route("/backend/restart", post(handle_restart))
@@ -3856,6 +3948,13 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/registry/candidate/expire", post(handle_registry_candidate_expire))
         .route("/registry/mcp/catalog", get(handle_registry_mcp_catalog))
         .route("/registry/mcp/execute", post(handle_registry_mcp_execute))
+        // Registry observation routes (M1-C2) — governed projection boundary
+        .route("/registry/observe/capabilities", get(handle_observe_capabilities))
+        .route("/registry/observe/capabilities/{id}", get(handle_observe_capability))
+        .route("/registry/observe/versions/{id}", get(handle_observe_versions))
+        .route("/registry/observe/dependencies/{id}", get(handle_observe_dependencies))
+        .route("/registry/observe/types", get(handle_observe_types))
+        .route("/registry/observe/overview", get(handle_observe_overview))
         .route("/registry/health", get(handle_registry_health))
         .route("/registry/cleanup", post(handle_registry_cleanup))
         .route("/registry/version", get(handle_registry_version))
